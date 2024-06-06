@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":lib:common"))
+    implementation(project(":libs:common"))
 }
 
 kotlin {

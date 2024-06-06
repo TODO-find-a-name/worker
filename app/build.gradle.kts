@@ -11,8 +11,8 @@ repositories {
 
 dependencies {
     implementation(project(":modules:js-module"))
-    implementation(project(":lib:common"))
-    implementation(project(":lib:core"))
+    implementation(project(":libs:common"))
+    implementation(project(":libs:core"))
 }
 
 kotlin {

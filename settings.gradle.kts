@@ -1,5 +1,5 @@
 rootProject.name = "worker"
 include("app")
-include("lib:core")
-include("lib:common")
+include("libs:core")
+include("libs:common")
 include("modules:js-module")
