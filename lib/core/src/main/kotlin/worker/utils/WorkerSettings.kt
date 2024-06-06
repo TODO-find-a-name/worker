@@ -1,0 +1,7 @@
+package com.todo.todo.worker.utils
+
+data class WorkerSettings(
+    val brokerAddr: String,
+    val organization: String,
+    val recruiterEventsPerCycle: Int = 100
+)
