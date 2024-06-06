@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation(kotlin("test"))
+    implementation(project(":lib:common"))
     implementation("io.socket:socket.io-client:2.1.0")
     implementation("com.google.code.gson:gson:2.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
@@ -23,9 +23,6 @@ dependencies {
     implementation("dev.onvoid.webrtc:webrtc-java:0.8.0:linux-aarch32")
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
 kotlin {
     jvmToolchain(8)
 }
