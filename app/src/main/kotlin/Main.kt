@@ -3,10 +3,12 @@ package org.example
 import com.todo.todo.ViewCallbacks
 import com.todo.todo.worker.Worker
 import com.todo.todo.worker.utils.WorkerSettings
+import js_module.JsWorkerModulePack
 
 fun main() {
     Worker(
         WorkerSettings("http://localhost:8080", "fatate"),
+        listOf(JsWorkerModulePack()),
         TerminalViewCallbacks()
     ).connect()
 }
