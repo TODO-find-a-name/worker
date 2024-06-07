@@ -1,7 +1,10 @@
 package module
 
+import messages.PeerMsg
+
 interface WorkerModule {
 
-    // TODO
+    fun incomingPeerMsg(recruiterId: String, msg: PeerMsg)
+    fun removeRecruiter(recruiterId: String)
 
 }
