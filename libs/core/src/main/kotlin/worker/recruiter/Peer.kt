@@ -6,7 +6,9 @@ import com.todo.todo.worker.socket.messages.TeamDetailsMsg
 import com.todo.todo.worker.socket.messages.data.AgnosticIceCandidate
 import com.todo.todo.worker.socket.messages.data.AgnosticRTCSessionDescription
 import com.todo.todo.worker.SharedRepository
+import com.todo.todo.worker.events.recruiter.IncomingRecruiterMsgPartEvent
 import dev.onvoid.webrtc.*
+import java.nio.charset.StandardCharsets
 
 class Peer(private val recruiterId: String, private val repository: SharedRepository) {
 
@@ -107,6 +109,26 @@ private class RecruiterPeerConnectionObserver(
 
     override fun onDataChannel(dataChannel: RTCDataChannel?) {
         println("Connessione aperta yeeeeeeeeeeee")
+        dataChannel?.registerObserver(DataChannelObserver(dataChannel, repository))
+    }
+
+}
+
+private class DataChannelObserver(val dataChannel: RTCDataChannel, val repository: SharedRepository) : RTCDataChannelObserver {
+    override fun onBufferedAmountChange(p0: Long) {
+        //TODO("Not yet implemented")
+        println("DATA CHANNEL OBSERVER ON BUFFERED AMOUNT CHANGE")
+    }
+
+    override fun onStateChange() {
+        //TODO("Not yet implemented")
+        println("DATA CHANNEL OBSERVER ON STATE CHANGE: " + dataChannel.state)
+    }
+
+    override fun onMessage(buffer: RTCDataChannelBuffer?) {
+        buffer?.data?.let {
+            repository.eventQueues.recruiter.add(IncomingRecruiterMsgPartEvent(repository, it))
+        }
     }
 
 }

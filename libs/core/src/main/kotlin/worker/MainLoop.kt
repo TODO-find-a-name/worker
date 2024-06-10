@@ -9,7 +9,6 @@ class MainLoop {
             val recruiterQueue = repository.eventQueues.recruiter
             val recruiterEventsPerCycle = repository.settings.recruiterEventsPerCycle
             var recruiterEventsIndex: Int
-
             while (repository.isRunning){
                 while (generalQueue.isNotEmpty()){
                     generalQueue.removeFirst().handleImpl()
@@ -23,6 +22,7 @@ class MainLoop {
                         recruiterQueue.removeFirst().handleImpl()
                     }
                 }
+                Thread.sleep(100)
             }
         }
 
