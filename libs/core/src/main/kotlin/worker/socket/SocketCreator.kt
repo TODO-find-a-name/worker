@@ -7,6 +7,7 @@ import com.todo.todo.worker.events.socket.TeamProposalMsgEvent
 import com.todo.todo.worker.socket.messages.abstractions.SocketMsgType
 import com.todo.todo.worker.SharedRepository
 import com.todo.todo.worker.events.SocketEvent
+import com.todo.todo.worker.utils.LoggerLvl
 import io.socket.client.IO
 import io.socket.engineio.client.transports.WebSocket
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -37,6 +38,7 @@ class SocketCreator {
         @OptIn(DelicateCoroutinesApi::class)
         private fun registerEventListeners(socket: SocketIo, repository: SharedRepository){
             socket.on(SocketIo.EVENT_CONNECT) {
+                repository.logger.logRegular(LoggerLvl.LOW, "Connected to Broker as " + socket.id())
                 stopMainLoop(repository)
                 repository.isRunning = true
                 repository.loop = Optional.of(GlobalScope.async {
@@ -45,10 +47,12 @@ class SocketCreator {
                 repository.viewCallbacks.onBrokerConnectionEstablished()
             }
             socket.on(SocketIo.EVENT_CONNECT_ERROR) {
+                repository.logger.logRegular(LoggerLvl.LOW, "Error while connecting to Broker")
                 stopMainLoop(repository)
                 repository.viewCallbacks.onBrokerConnectionError()
             }
             socket.on(SocketIo.EVENT_DISCONNECT) {
+                repository.logger.logRegular(LoggerLvl.LOW, "Disconnection from Broker")
                 stopMainLoop(repository)
                 repository.viewCallbacks.onBrokerDisconnection()
             }
@@ -83,7 +87,18 @@ class SocketCreator {
         ){
             socket.on(msgType){
                 if(it !== null && it.size == 1){
+                    repository.logger.logRegular(
+                        LoggerLvl.COMPLETE,
+                        "Incoming " + SocketMsgType.toHumanReadableMsgType(msgType) + " socket msg, enqueueing its event"
+                    )
                     repository.eventQueues.socket.add(eventStrategy(it[0].toString()))
+                } else {
+                    repository.logger.errorSocket(
+                        SocketMsgType.toHumanReadableMsgType(msgType),
+                        "Incoming invalid msg, discarding it:\n " +
+                                "payload == null is " + (it == null) +
+                                ", payload.size == 1 is " + (it.size == 1)
+                    )
                 }
             }
         }

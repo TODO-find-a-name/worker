@@ -7,6 +7,8 @@ import com.todo.todo.worker.socket.messages.data.AgnosticIceCandidate
 import com.todo.todo.worker.socket.messages.data.AgnosticRTCSessionDescription
 import com.todo.todo.worker.SharedRepository
 import com.todo.todo.worker.events.recruiter.IncomingRecruiterMsgPartEvent
+import com.todo.todo.worker.socket.messages.abstractions.SocketMsgType
+import com.todo.todo.worker.utils.LoggerLvl
 import dev.onvoid.webrtc.*
 import java.nio.charset.StandardCharsets
 
@@ -38,9 +40,17 @@ class Peer(private val recruiterId: String, private val repository: SharedReposi
             object : OnDescriptionSet(recruiterId, repository){
                 override fun onSuccess() {
                     AgnosticRTCSessionDescription.adaptConcrete(sessionDescription).ifPresent{
-                        println("INVIATA LA LOCAL DESCRIPTION")
-                        InterviewAcceptanceMsg.send(repository, recruiterId, it){ redirectedToRecruiter ->
-                            if(!redirectedToRecruiter){
+                        repository.logger.logSocketOutgoing(
+                            LoggerLvl.MID,
+                            SocketMsgType.INTERVIEW_ACCEPTANCE_NAME,
+                            recruiterId,
+                            "Sending session description"
+                        )
+                        InterviewAcceptanceMsg.send(repository, recruiterId, it){ ack ->
+                            repository.logger.logSocketOutgoingAck(
+                                LoggerLvl.COMPLETE, SocketMsgType.INTERVIEW_ACCEPTANCE_NAME, recruiterId, ack
+                            )
+                            if(!ack){
                                 repository.eventQueues.general.add(RemoveRecruiterEvent(repository, recruiterId))
                             }
                         }
@@ -48,6 +58,10 @@ class Peer(private val recruiterId: String, private val repository: SharedReposi
                 }
             }
         )
+    }
+
+    fun isConnected(): Boolean {
+        return peer.connectionState == RTCPeerConnectionState.CONNECTED
     }
 
     fun addIceCandidate(candidate: RTCIceCandidate){
@@ -80,54 +94,60 @@ class Peer(private val recruiterId: String, private val repository: SharedReposi
             )
         )
         return PeerConnectionFactory().createPeerConnection(
-            rtcConfiguration, RecruiterPeerConnectionObserver(recruiterId, repository)
+            rtcConfiguration, RecruiterPeerConnectionObserver(recruiterId, repository, this)
         )
     }
 
 }
 
 private class RecruiterPeerConnectionObserver(
-    private val recruiterId: String, private val repository: SharedRepository
+    private val recruiterId: String, private val repository: SharedRepository, private val peer: Peer
 ): PeerConnectionObserver {
 
     override fun onIceCandidate(candidate: RTCIceCandidate?) {
-        candidate?.let {
-            TeamDetailsMsg.send(
-                repository, recruiterId, AgnosticIceCandidate.adaptConcrete(candidate)
-            ){ ack ->
-                // println("ice candidate sent ack: $ack")
+        if(peer.isConnected()){
+            candidate?.let {
+                repository.logger.logSocketOutgoing(LoggerLvl.HIGH, SocketMsgType.TEAM_DETAILS_NAME, recruiterId, "Sending ice candidate")
+                TeamDetailsMsg.send(
+                    repository, recruiterId, AgnosticIceCandidate.adaptConcrete(candidate)
+                ){
+                    repository.logger.logSocketOutgoingAck(
+                        LoggerLvl.COMPLETE, SocketMsgType.TEAM_APPLICATION_NAME, recruiterId, it
+                    )
+                    // TODO remove Recruiter if ack false
+                }
             }
         }
     }
 
     override fun onConnectionChange(state: RTCPeerConnectionState?) {
         state?.let {
-            println("state: " + state.name)
-            // TODO CONNECTING, CONNECTED, DISCONNECTED, per ora
+            // TODO CONNECTING, CONNECTED, DISCONNECTED, FAILED, maybe more
         }
     }
 
     override fun onDataChannel(dataChannel: RTCDataChannel?) {
-        println("Connessione aperta yeeeeeeeeeeee")
-        dataChannel?.registerObserver(DataChannelObserver(dataChannel, repository))
+        dataChannel?.registerObserver(DataChannelObserver(dataChannel, repository, recruiterId))
     }
 
 }
 
-private class DataChannelObserver(val dataChannel: RTCDataChannel, val repository: SharedRepository) : RTCDataChannelObserver {
+private class DataChannelObserver(val dataChannel: RTCDataChannel, val repository: SharedRepository, private val recruiterId: String) : RTCDataChannelObserver {
     override fun onBufferedAmountChange(p0: Long) {
         //TODO("Not yet implemented")
         println("DATA CHANNEL OBSERVER ON BUFFERED AMOUNT CHANGE")
     }
 
     override fun onStateChange() {
-        //TODO("Not yet implemented")
-        println("DATA CHANNEL OBSERVER ON STATE CHANGE: " + dataChannel.state)
+        if(dataChannel.state.equals(RTCDataChannelState.OPEN)){
+            repository.logger.logRegular(LoggerLvl.LOW, "Recruiter $recruiterId connected")
+        }
     }
 
     override fun onMessage(buffer: RTCDataChannelBuffer?) {
         buffer?.data?.let {
-            repository.eventQueues.recruiter.add(IncomingRecruiterMsgPartEvent(repository, it))
+            repository.logger.logRegular(LoggerLvl.COMPLETE, "Incoming p2p msg part from $recruiterId, enqueueing its event")
+            repository.eventQueues.recruiter.add(IncomingRecruiterMsgPartEvent(repository, recruiterId, it))
         }
     }
 

@@ -22,7 +22,7 @@ class MainLoop {
                         recruiterQueue.removeFirst().handleImpl()
                     }
                 }
-                Thread.sleep(100)
+                Thread.sleep(100) // TODO find something more elegant
             }
         }
 

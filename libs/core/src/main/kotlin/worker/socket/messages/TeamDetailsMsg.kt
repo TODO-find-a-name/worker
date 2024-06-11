@@ -5,9 +5,22 @@ import com.todo.todo.worker.socket.messages.abstractions.DirectMsg
 import com.todo.todo.worker.socket.messages.abstractions.SocketMsgType
 import com.todo.todo.worker.socket.messages.data.AgnosticIceCandidate
 import com.todo.todo.worker.SharedRepository
+import dev.onvoid.webrtc.RTCIceCandidate
+import java.util.Optional
 
 class TeamDetailsMsg: DirectMsg() {
     @SerializedName("candidate") var candidate: AgnosticIceCandidate? = null
+
+    fun toChecked(): Optional<TeamDetailsMsgChecked>{
+        if(candidate == null || from == null || to == null){
+            return Optional.empty()
+        }
+        val concreteCandidate = candidate!!.toConcrete()
+        if(concreteCandidate.isEmpty){
+            return Optional.empty()
+        }
+        return Optional.of(TeamDetailsMsgChecked(from!!, to!!, concreteCandidate.get()))
+    }
 
     companion object {
         fun send(
@@ -24,3 +37,9 @@ class TeamDetailsMsg: DirectMsg() {
         }
     }
 }
+
+data class TeamDetailsMsgChecked(
+    val from: String,
+    val to: String,
+    val candidate: RTCIceCandidate
+)

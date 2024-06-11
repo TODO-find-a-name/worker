@@ -5,6 +5,7 @@ import com.todo.todo.worker.socket.Socket
 import com.todo.todo.ViewCallbacks
 import com.todo.todo.worker.utils.EventQueues
 import com.todo.todo.worker.utils.JsonParser
+import com.todo.todo.worker.utils.Logger
 import com.todo.todo.worker.utils.WorkerSettings
 import kotlinx.coroutines.Deferred
 import module.WorkerModule
@@ -17,6 +18,7 @@ class SharedRepository(
 
     val modules: Map<String, WorkerModule> = createModules(modulePacks)
     var isRunning: Boolean = false
+    val logger: Logger = Logger(settings)
     var loop: Optional<Deferred<Any>> = Optional.empty()
     val socket = Socket(this)
     val parser = JsonParser()
