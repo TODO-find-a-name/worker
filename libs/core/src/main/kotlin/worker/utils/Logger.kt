@@ -8,36 +8,39 @@ class Logger(settings: WorkerSettings) {
 
     private val settingsLvl: Int = settings.loggingLvl.ordinal
 
-    fun logRegular(lvl: LoggerLvl, log: String){
-        if (lvl.ordinal <= settingsLvl) {
-            println(timestamp() + "\n" + log + "\n")
+    private fun brackets(content: String): String{
+        return "[$content]"
+    }
+
+    private fun buildLog(info: List<String> , log: String): String {
+        if(info.isEmpty()) {
+            return brackets(LocalDateTime.now().toString()) + "\n" + log + "\n"
         }
+        return brackets(LocalDateTime.now().toString()) + info.reduce{ acc, i -> acc + brackets(i) } + "\n" + log + "\n"
+    }
+
+    fun log(lvl: LoggerLvl, log: String, vararg info: String){
+        if (lvl.ordinal <= settingsLvl) {
+            println(buildLog(info.toList(), log))
+        }
+    }
+
+    fun logRegular(lvl: LoggerLvl, log: String){
+        log(lvl, log)
     }
 
     fun logSocketIncoming(lvl: LoggerLvl, msgType: String, from: String, log: String){
-        if (lvl.ordinal <= settingsLvl) {
-            println(
-                timestamp() +
-                        brackets("Incoming socket msg $msgType from $from") +
-                        "\n" + log + "\n"
-            )
-        }
+        log(lvl, log, "Incoming socket msg $msgType from $from")
     }
 
     fun logSocketOutgoing(lvl: LoggerLvl, msgType: String, to: String, log: String){
-        if (lvl.ordinal <= settingsLvl) {
-            println(
-                timestamp() +
-                        brackets("Outgoing socket msg $msgType to $to") +
-                        "\n" + log + "\n"
-            )
-        }
+        log(lvl, log, "Outgoing socket msg $msgType to $to")
     }
 
     fun logSocketOutgoingAck(lvl: LoggerLvl, msgType: String, to: String, ack: Boolean, log: String = ""){
         if (lvl.ordinal <= settingsLvl) {
             println(
-                timestamp() +
+                brackets(LocalDateTime.now().toString()) +
                         brackets("Outgoing socket msg $msgType to $to") +
                         brackets("Ack: $ack") +
                         (if(log == "") "\n" else "\n" + log + "\n")
@@ -46,47 +49,45 @@ class Logger(settings: WorkerSettings) {
     }
 
     fun logP2PIncomingPart(lvl: LoggerLvl, p2PeerMsgPartChecked: PeerMsgPartChecked, from: String){
-        if (lvl.ordinal <= settingsLvl) {
-            println(
-                timestamp() +
-                        brackets("Incoming p2p msg ${p2PeerMsgPartChecked.msgType} from $from") +
-                        brackets("Id: " + p2PeerMsgPartChecked.msgId) +
-                        brackets(p2PeerMsgPartChecked.part.toString() + "/" + p2PeerMsgPartChecked.total) +
-                        "\n"
-            )
-        }
+        log(
+            lvl,
+            "Received p2p msg part with index " + p2PeerMsgPartChecked.part.toString() + " (total: " + p2PeerMsgPartChecked.total + ")",
+            "Incoming p2p msg ${p2PeerMsgPartChecked.msgType} from $from",
+            "Id: " + p2PeerMsgPartChecked.msgId
+        )
     }
 
     fun logP2PIncomingComplete(lvl: LoggerLvl, p2PeerMsgPartChecked: PeerMsg, from: String){
-        if (lvl.ordinal <= settingsLvl) {
-            println(
-                timestamp() +
-                        brackets("Incoming p2p msg ${p2PeerMsgPartChecked.msgType} from $from") +
-                        brackets("Id: " + p2PeerMsgPartChecked.msgId) +
-                        brackets("Module: ${p2PeerMsgPartChecked.module}") +
-                        "\n"
-            )
-        }
+        log(
+            lvl,
+            "Reconstructed p2p msg",
+            "Incoming p2p msg ${p2PeerMsgPartChecked.msgType} from $from",
+            "Id: " + p2PeerMsgPartChecked.msgId
+        )
     }
 
-    private fun timestamp(): String {
-        return brackets(LocalDateTime.now().toString())
+    private fun error(log: String, vararg info: String){
+        System.err.println(buildLog(info.toList(), log))
     }
 
-    private fun brackets(content: String): String{
-        return "[$content]"
-    }
-
-    fun error(log: String){
-        println("[" + LocalDateTime.now().toString() + "]\n" + log + "\n") // TODO
+    fun errorRecruiter(recruiterId: String, log: String){
+        error(log, "Incoming p2p msg from $recruiterId")
     }
 
     fun errorSocket(msgType: String, log: String, from: String = ""){
-        println(
-            timestamp() +
-                    brackets("socket msg: $msgType") +
-                    (if(from == "") "" else brackets("from: $from")) + "\n" +
-                    log + "\n"
+        if(from == ""){
+            error(log, "socket msg: $msgType")
+        } else {
+            error(log, "socket msg: $msgType", "from: $from")
+        }
+    }
+
+    fun errorIncomingP2PMsg(recruiterId: String, peerMsg: PeerMsg, log: String){
+        error(
+            log,
+            "Incoming p2p ${peerMsg.msgType} msg from $recruiterId",
+            "Id: ${peerMsg.msgId}",
+            "Module: ${peerMsg.module}"
         )
     }
 }

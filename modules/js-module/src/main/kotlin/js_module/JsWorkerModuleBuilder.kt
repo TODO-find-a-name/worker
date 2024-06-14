@@ -5,16 +5,23 @@ import module.WorkerModule
 import module.WorkerModuleBuilder
 
 class JsWorkerModuleBuilder : WorkerModuleBuilder {
-    override fun onCriticalError(callback: (recruiterId: String) -> Any) {
-        TODO("Not yet implemented")
+
+    private var onCriticalErrorCallback: ((recruiterId: String) -> Unit)? = null
+    private var sendPeerMsgCallback: ((recruiterId: String, msg: PeerMsg) -> Unit)? = null
+
+    override fun onCriticalError(callback: (recruiterId: String) -> Unit): JsWorkerModuleBuilder {
+        this.onCriticalErrorCallback = callback
+        return this
     }
 
-    override fun sendPeerMsg(callback: (recruiterId: String, msg: PeerMsg) -> Any) {
-        TODO("Not yet implemented")
+    override fun sendPeerMsg(callback: (recruiterId: String, msg: PeerMsg) -> Unit): JsWorkerModuleBuilder {
+        this.sendPeerMsgCallback = callback
+        return this
     }
 
     override fun build(): WorkerModule {
-        // TODO
-        return JsWorkerModule()
+        return JsWorkerModule(
+            this.onCriticalErrorCallback!!, this.sendPeerMsgCallback!!
+        )
     }
 }

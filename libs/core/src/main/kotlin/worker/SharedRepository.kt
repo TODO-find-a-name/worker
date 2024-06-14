@@ -3,6 +3,8 @@ package com.todo.todo.worker
 import com.todo.todo.worker.recruiter.Recruiter
 import com.todo.todo.worker.socket.Socket
 import com.todo.todo.ViewCallbacks
+import com.todo.todo.worker.events.general.RemoveRecruiterEvent
+import com.todo.todo.worker.events.recruiter.SendPeerMsgToRecruiterEvent
 import com.todo.todo.worker.utils.EventQueues
 import com.todo.todo.worker.utils.JsonParser
 import com.todo.todo.worker.utils.Logger
@@ -28,7 +30,25 @@ class SharedRepository(
     private fun createModules(modulePacks: List<WorkerModulePack>): Map<String, WorkerModule> {
         return modulePacks.associateBy(
             {pack -> pack.id()},
-            {pack -> pack.builder().build()} // TODO actual build
+            {pack -> pack.builder()
+                .sendPeerMsg{ recruiterId, msg ->
+                    eventQueues.recruiter.add(SendPeerMsgToRecruiterEvent(this, recruiterId, msg))
+                }
+                .onCriticalError{ recruiterId ->
+                    eventQueues.general.add(RemoveRecruiterEvent(this, recruiterId))
+                }
+                .build()
+            }
         )
     }
+
+    fun removeRecruiter(id: String) {
+        recruiters.remove(id)?.let { removeRecruiter(it)}
+    }
+
+    fun removeRecruiter(recruiter: Recruiter){
+        recruiter.disconnect()
+        // TODO everything that needs to be done
+    }
+
 }

@@ -8,7 +8,7 @@ class RemoveRecruiterEvent(
 ) : GeneralEvent(repository) {
 
     override fun handleImpl() {
-        repository.recruiters.remove(id)?.disconnect()
+        repository.removeRecruiter(id)
     }
 
 }

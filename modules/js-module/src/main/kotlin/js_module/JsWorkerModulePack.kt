@@ -4,6 +4,7 @@ import module.WorkerModuleBuilder
 import module.WorkerModulePack
 
 class JsWorkerModulePack : WorkerModulePack {
+
     override fun id(): String {
         return "JS"
     }
@@ -11,4 +12,5 @@ class JsWorkerModulePack : WorkerModulePack {
     override fun builder(): WorkerModuleBuilder {
         return JsWorkerModuleBuilder()
     }
+
 }
