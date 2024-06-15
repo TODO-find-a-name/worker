@@ -1,7 +1,7 @@
 package com.todo.todo.worker.events.recruiter
 
 import com.todo.todo.worker.SharedRepository
-import com.todo.todo.worker.events.RecruiterEvent
+import com.todo.todo.worker.events.Event
 import com.todo.todo.worker.recruiter.PendingMsg
 import com.todo.todo.worker.recruiter.Recruiter
 import com.todo.todo.worker.utils.LoggerLvl
@@ -14,7 +14,7 @@ import java.time.LocalDateTime
 
 class IncomingRecruiterMsgPartEvent(
     repository: SharedRepository, private val recruiterId: String, private val msg: ByteBuffer
-) : RecruiterEvent(repository) {
+) : Event(repository) {
 
     override fun handleImpl() {
         val recruiter = repository.recruiters[recruiterId]

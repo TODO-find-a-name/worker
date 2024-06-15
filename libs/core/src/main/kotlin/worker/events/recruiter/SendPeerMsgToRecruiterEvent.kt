@@ -1,13 +1,13 @@
 package com.todo.todo.worker.events.recruiter
 
 import com.todo.todo.worker.SharedRepository
-import com.todo.todo.worker.events.RecruiterEvent
+import com.todo.todo.worker.events.Event
 import com.todo.todo.worker.utils.LoggerLvl
 import messages.PeerMsg
 
 class SendPeerMsgToRecruiterEvent(
     repository: SharedRepository, private val recruiterId: String, private val msg: PeerMsg
-): RecruiterEvent(repository) {
+): Event(repository) {
 
     override fun handleImpl() {
         repository.recruiters[recruiterId]?.let {
@@ -16,7 +16,9 @@ class SendPeerMsgToRecruiterEvent(
                 it.peer.sendMsg(msg)
             } else {
                 log(LoggerLvl.COMPLETE, "Recruiter's peer is not connected, postponing msg")
-                repository.eventQueues.recruiter.add(this)
+                println("CASO MOLTO MOLTO MOLTO BRUTTO PORCO DIO")
+                //repository.eventQueues.recruiter.add(this)
+
             }
             return
         }

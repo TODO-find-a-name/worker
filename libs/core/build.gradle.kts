@@ -15,14 +15,10 @@ dependencies {
     implementation("com.google.code.gson:gson:2.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
     implementation("dev.onvoid.webrtc:webrtc-java:0.8.0")
-    implementation("dev.onvoid.webrtc:webrtc-java:0.8.0:windows-x86_64")
-    implementation("dev.onvoid.webrtc:webrtc-java:0.8.0:macos-x86_64")
+    //implementation("dev.onvoid.webrtc:webrtc-java:0.8.0:windows-x86_64")
+    //implementation("dev.onvoid.webrtc:webrtc-java:0.8.0:macos-x86_64")
     implementation("dev.onvoid.webrtc:webrtc-java:0.8.0:macos-aarch64")
-    implementation("dev.onvoid.webrtc:webrtc-java:0.8.0:linux-x86_64")
-    implementation("dev.onvoid.webrtc:webrtc-java:0.8.0:linux-aarch64")
-    implementation("dev.onvoid.webrtc:webrtc-java:0.8.0:linux-aarch32")
-}
-
-kotlin {
-    jvmToolchain(21)
+    //implementation("dev.onvoid.webrtc:webrtc-java:0.8.0:linux-x86_64")
+    //implementation("dev.onvoid.webrtc:webrtc-java:0.8.0:linux-aarch64")
+    //implementation("dev.onvoid.webrtc:webrtc-java:0.8.0:linux-aarch32")
 }

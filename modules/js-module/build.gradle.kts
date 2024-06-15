@@ -12,7 +12,3 @@ repositories {
 dependencies {
     implementation(project(":libs:common"))
 }
-
-kotlin {
-    jvmToolchain(21)
-}

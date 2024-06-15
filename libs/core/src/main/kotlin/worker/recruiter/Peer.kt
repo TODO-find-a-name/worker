@@ -1,20 +1,17 @@
 package com.todo.todo.worker.recruiter
 
 import com.todo.todo.worker.events.general.RemoveRecruiterEvent
-import com.todo.todo.worker.socket.messages.InterviewAcceptanceMsg
 import com.todo.todo.worker.socket.messages.TeamDetailsMsg
 import com.todo.todo.worker.socket.messages.data.AgnosticIceCandidate
-import com.todo.todo.worker.socket.messages.data.AgnosticRTCSessionDescription
 import com.todo.todo.worker.SharedRepository
 import com.todo.todo.worker.events.recruiter.IncomingRecruiterMsgPartEvent
+import com.todo.todo.worker.events.recruiter.negotiation.CreateAnswerNegotiationEvent
+import com.todo.todo.worker.events.socket.outgoing.OutgoingInterviewAcceptanceMsgEvent
 import com.todo.todo.worker.socket.messages.abstractions.SocketMsgType
 import com.todo.todo.worker.utils.LoggerLvl
 import dev.onvoid.webrtc.*
 import messages.PeerMsg
-import messages.PeerMsgPart
 import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets
-import kotlin.math.ceil
 
 class Peer(private val recruiterId: String, private val repository: SharedRepository) {
 
@@ -26,27 +23,8 @@ class Peer(private val recruiterId: String, private val repository: SharedReposi
         if(dataChannel == null){
             println("QUALCOSA è ANDATO MOLTO STORTO IL DATA CHANNEL è NULL")
         }
-        val payloadLen = msg.payload.length
-        var totalParts: Int = ceil(payloadLen.toDouble() / repository.settings.p2pPayloadSizeBytes).toInt()
-        if(totalParts == 0){
-            totalParts = 1
-        }
-        for(i in 0..< totalParts){
-            val part = PeerMsgPart()
-            part.total = totalParts.toLong()
-            part.part = i.toLong()
-            part.msgId = msg.msgId
-            part.msgType = msg.msgType
-            part.module = msg.module
-            part.jobId = msg.jobId
-            part.jobType = msg.jobType
-            val chunkStart = i * repository.settings.p2pPayloadSizeBytes
-            var chunkEnd = chunkStart + repository.settings.p2pPayloadSizeBytes
-            if(chunkEnd > payloadLen){
-                chunkEnd = payloadLen
-            }
-            part.payload = msg.payload.substring(i * repository.settings.p2pPayloadSizeBytes, chunkEnd)
-            dataChannel?.send(RTCDataChannelBuffer(ByteBuffer.wrap(parser.toJson(part).toByteArray()), false))
+        msg.splitIntoParts(repository.settings.p2pPayloadSizeBytes).forEach {
+            dataChannel?.send(RTCDataChannelBuffer(ByteBuffer.wrap(parser.toJson(it).toByteArray()), false))
         }
     }
 
@@ -55,7 +33,7 @@ class Peer(private val recruiterId: String, private val repository: SharedReposi
             sessionDescription,
             object : OnDescriptionSet(recruiterId, repository){
                 override fun onSuccess() {
-                    repository.recruiters[recruiterId]?.peer?.createAnswer()
+                    CreateAnswerNegotiationEvent(repository, recruiterId).handle()
                 }
             }
         )
@@ -73,23 +51,7 @@ class Peer(private val recruiterId: String, private val repository: SharedReposi
             sessionDescription,
             object : OnDescriptionSet(recruiterId, repository){
                 override fun onSuccess() {
-                    AgnosticRTCSessionDescription.adaptConcrete(sessionDescription).ifPresent{
-                        repository.logger.logSocketOutgoing(
-                            LoggerLvl.MID,
-                            SocketMsgType.INTERVIEW_ACCEPTANCE_NAME,
-                            recruiterId,
-                            "Sending session description"
-                        )
-                        InterviewAcceptanceMsg.send(repository, recruiterId, it){ ack ->
-                            repository.logger.logSocketOutgoingAck(
-                                LoggerLvl.COMPLETE, SocketMsgType.INTERVIEW_ACCEPTANCE_NAME, recruiterId, ack
-                            )
-                            if(!ack){
-                                println("interview acceptance ack false")
-                                repository.eventQueues.general.add(RemoveRecruiterEvent(repository, recruiterId))
-                            }
-                        }
-                    }
+                    OutgoingInterviewAcceptanceMsgEvent(repository, recruiterId, sessionDescription).handle()
                 }
             }
         )
@@ -185,7 +147,6 @@ private class DataChannelObserver(val dataChannel: RTCDataChannel, val repositor
     override fun onMessage(buffer: RTCDataChannelBuffer?) {
         buffer?.data?.let {
             repository.logger.logRegular(LoggerLvl.COMPLETE, "Incoming p2p msg part from $recruiterId, enqueueing its event")
-            //repository.eventQueues.recruiter.add(IncomingRecruiterMsgPartEvent(repository, recruiterId, it))
             IncomingRecruiterMsgPartEvent(repository, recruiterId, it).handle()
         }
     }
@@ -198,7 +159,7 @@ private abstract class OnDescriptionSet(
 
     override fun onFailure(p0: String?) {
         println("on description set failure")
-        repository.eventQueues.general.add(RemoveRecruiterEvent(repository, id))
+        RemoveRecruiterEvent(repository, id).handle()
     }
 
 }
@@ -215,7 +176,7 @@ private class OnAnswerCreated(
 
     override fun onFailure(p0: String?) {
         println("OnAnswerCreated onFailure")
-        repository.eventQueues.general.add(RemoveRecruiterEvent(repository, id))
+        RemoveRecruiterEvent(repository, id).handle()
     }
 
 }

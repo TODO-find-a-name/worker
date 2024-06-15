@@ -1,16 +1,16 @@
-package com.todo.todo.worker.events.socket
+package com.todo.todo.worker.events.socket.incoming
 
 import com.todo.todo.worker.recruiter.Recruiter
 import com.todo.todo.worker.socket.messages.InterviewProposalMsg
 import com.todo.todo.worker.SharedRepository
-import com.todo.todo.worker.events.SocketEvent
+import com.todo.todo.worker.events.Event
 import com.todo.todo.worker.socket.messages.InterviewProposalMsgChecked
 import com.todo.todo.worker.socket.messages.abstractions.SocketMsgType
 import com.todo.todo.worker.utils.LoggerLvl
 
-class InterviewProposalMsgEvent(
+class IncomingInterviewProposalMsgEvent(
     repository: SharedRepository, private val payload:String
-) : SocketEvent(repository) {
+) : Event(repository) {
 
     override fun handleImpl() {
         repository.parser.fromJson(payload, InterviewProposalMsg::class.java).ifPresentOrElse(

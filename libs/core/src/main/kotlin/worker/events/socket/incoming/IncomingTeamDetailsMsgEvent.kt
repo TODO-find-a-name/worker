@@ -1,13 +1,13 @@
-package com.todo.todo.worker.events.socket
+package com.todo.todo.worker.events.socket.incoming
 
 import com.todo.todo.worker.socket.messages.TeamDetailsMsg
 import com.todo.todo.worker.SharedRepository
-import com.todo.todo.worker.events.SocketEvent
+import com.todo.todo.worker.events.Event
 import com.todo.todo.worker.socket.messages.TeamDetailsMsgChecked
 import com.todo.todo.worker.socket.messages.abstractions.SocketMsgType
 import com.todo.todo.worker.utils.LoggerLvl
 
-class TeamDetailsMsgEvent(repository: SharedRepository, private val payload:String) : SocketEvent(repository) {
+class IncomingTeamDetailsMsgEvent(repository: SharedRepository, private val payload:String) : Event(repository) {
 
     override fun handleImpl() {
         repository.parser.fromJson(payload, TeamDetailsMsg::class.java).ifPresentOrElse(

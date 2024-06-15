@@ -1,11 +1,11 @@
 package com.todo.todo.worker.events.general
 
 import com.todo.todo.worker.SharedRepository
-import com.todo.todo.worker.events.GeneralEvent
+import com.todo.todo.worker.events.Event
 
 class RemoveRecruiterEvent(
     repository: SharedRepository, private val id: String
-) : GeneralEvent(repository) {
+) : Event(repository) {
 
     override fun handleImpl() {
         repository.removeRecruiter(id)

@@ -20,5 +20,9 @@ Everything that is shared goes here
 ## Building the project
 Just use the Gradle wrapper from the project's main directory.
 
+## Reminder
+- running it on openjdk21 on macos with M3 processor seems to produce problems
+- it is necessary to do some shit for the dependencies depending on the architecture in core's build.gradle.kts
+
 ## TODOs
 Basically everything

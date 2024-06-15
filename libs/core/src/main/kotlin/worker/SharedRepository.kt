@@ -5,26 +5,24 @@ import com.todo.todo.worker.socket.Socket
 import com.todo.todo.ViewCallbacks
 import com.todo.todo.worker.events.general.RemoveRecruiterEvent
 import com.todo.todo.worker.events.recruiter.SendPeerMsgToRecruiterEvent
-import com.todo.todo.worker.utils.EventQueues
 import com.todo.todo.worker.utils.JsonParser
+import com.todo.todo.worker.utils.Lock
 import com.todo.todo.worker.utils.Logger
 import com.todo.todo.worker.utils.WorkerSettings
-import kotlinx.coroutines.Deferred
 import module.WorkerModule
 import module.WorkerModulePack
-import java.util.*
 
 class SharedRepository(
     val settings: WorkerSettings, modulePacks: List<WorkerModulePack>, val viewCallbacks: ViewCallbacks
 ) {
 
-    val modules: Map<String, WorkerModule> = createModules(modulePacks)
+    val lock: Lock = Lock()
+
     var isRunning: Boolean = false
+    val modules: Map<String, WorkerModule> = createModules(modulePacks)
     val logger: Logger = Logger(settings)
-    var loop: Optional<Deferred<Any>> = Optional.empty()
     val socket = Socket(this)
     val parser = JsonParser()
-    val eventQueues = EventQueues()
     val recruiters: MutableMap<String, Recruiter> = mutableMapOf()
 
     private fun createModules(modulePacks: List<WorkerModulePack>): Map<String, WorkerModule> {
@@ -32,10 +30,10 @@ class SharedRepository(
             {pack -> pack.id()},
             {pack -> pack.builder()
                 .sendPeerMsg{ recruiterId, msg ->
-                    eventQueues.recruiter.add(SendPeerMsgToRecruiterEvent(this, recruiterId, msg))
+                    SendPeerMsgToRecruiterEvent(this, recruiterId, msg).handleImpl()
                 }
                 .onCriticalError{ recruiterId ->
-                    eventQueues.general.add(RemoveRecruiterEvent(this, recruiterId))
+                    RemoveRecruiterEvent(this, recruiterId).handleImpl()
                 }
                 .build()
             }
