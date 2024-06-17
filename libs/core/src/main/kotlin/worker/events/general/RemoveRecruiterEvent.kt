@@ -8,6 +8,7 @@ class RemoveRecruiterEvent(
 ) : Event(repository) {
 
     override fun handleImpl() {
+        println("removing recruiter")
         repository.removeRecruiter(id)
     }
 

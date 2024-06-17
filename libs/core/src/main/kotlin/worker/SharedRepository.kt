@@ -16,10 +16,10 @@ class SharedRepository(
     val settings: WorkerSettings, modulePacks: List<WorkerModulePack>, val viewCallbacks: ViewCallbacks
 ) {
 
-    val lock: Lock = Lock()
-
     var isRunning: Boolean = false
-    val modules: Map<String, WorkerModule> = createModules(modulePacks)
+
+    val lock: Lock = Lock()
+    val modules = createModules(modulePacks)
     val logger: Logger = Logger(settings)
     val socket = Socket(this)
     val parser = JsonParser()
@@ -30,10 +30,10 @@ class SharedRepository(
             {pack -> pack.id()},
             {pack -> pack.builder()
                 .sendPeerMsg{ recruiterId, msg ->
-                    SendPeerMsgToRecruiterEvent(this, recruiterId, msg).handleImpl()
+                    SendPeerMsgToRecruiterEvent(this, recruiterId, msg).handle()
                 }
                 .onCriticalError{ recruiterId ->
-                    RemoveRecruiterEvent(this, recruiterId).handleImpl()
+                    RemoveRecruiterEvent(this, recruiterId).handle()
                 }
                 .build()
             }
@@ -41,12 +41,12 @@ class SharedRepository(
     }
 
     fun removeRecruiter(id: String) {
-        recruiters.remove(id)?.let { removeRecruiter(it)}
-    }
-
-    fun removeRecruiter(recruiter: Recruiter){
-        recruiter.disconnect()
-        // TODO everything that needs to be done
+        recruiters.remove(id)?.let {
+            it.disconnect()
+            it.timeoutTimer.cancel()
+            it.pendingMessages.forEach{ pair -> pair.value.cancelTimeout() }
+            it.pendingMessages.clear()
+        }
     }
 
 }

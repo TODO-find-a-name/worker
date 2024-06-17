@@ -18,7 +18,7 @@ class Recruiter(private val recruiterId: String, private val repository: SharedR
 
     val pendingMessages: MutableMap<String, PendingMsg> = mutableMapOf()
 
-    private val timeoutTimer = Timer()
+    val timeoutTimer = Timer()
     private val parser = repository.parser
     private val peer: RTCPeerConnection = createPeer()
 
@@ -30,8 +30,8 @@ class Recruiter(private val recruiterId: String, private val repository: SharedR
                 override fun run() {
                     repository.lock.execute {
                         if(repository.isRunning){
-                            if(!isConnected()){
-                                repository.removeRecruiter(recruiterId)
+                            if(!isConnected() && repository.recruiters.contains(recruiterId)){
+                                RemoveRecruiterEvent(repository, recruiterId).handle()
                             }
                         }
                     }
@@ -95,8 +95,11 @@ class Recruiter(private val recruiterId: String, private val repository: SharedR
 
     fun disconnect(){
         println("disconnecting recruiter $recruiterId")
-        dataChannel?.close()
-        peer.close()
+        if(isConnected()){
+            dataChannel?.close()
+            peer.close()
+        }
+        dataChannel = null
         // TODO implement
     }
 
@@ -152,7 +155,10 @@ private class RecruiterPeerConnectionObserver(
 
     override fun onConnectionChange(state: RTCPeerConnectionState?) {
         state?.let {
-            // TODO CONNECTING, CONNECTED, DISCONNECTED, FAILED, maybe more
+            println(it.toString())
+            if(it == RTCPeerConnectionState.DISCONNECTED || it == RTCPeerConnectionState.FAILED){
+                RemoveRecruiterEvent(repository, recruiterId).handle()
+            }
         }
     }
 
