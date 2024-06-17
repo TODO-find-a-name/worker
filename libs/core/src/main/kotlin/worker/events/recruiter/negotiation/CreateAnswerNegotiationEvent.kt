@@ -6,7 +6,7 @@ import com.todo.todo.worker.events.Event
 class CreateAnswerNegotiationEvent(repository: SharedRepository, val recruiterId: String) : Event(repository) {
 
     override fun handleImpl() {
-        repository.recruiters[recruiterId]?.peer?.createAnswer()
+        repository.recruiters[recruiterId]?.createAnswer()
     }
 
 }

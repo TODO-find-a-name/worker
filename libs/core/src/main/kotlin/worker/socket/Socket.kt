@@ -18,7 +18,6 @@ class Socket(repository: SharedRepository) {
 
     fun connect() {
         socketIO.connect()
-        //timeoutRoutine.launchTimeoutRoutine()
     }
 
     fun disconnect() {

@@ -24,11 +24,11 @@ class IncomingTeamDetailsMsgEvent(repository: SharedRepository, private val payl
         if(recruiter == null){
             repository.logger.errorSocket(SocketMsgType.TEAM_DETAILS_NAME, "Recruiter not found", checkedMsg.from)
         } else {
-            if(recruiter.peer.isConnected()){
+            if(recruiter.isConnected()){
                 logHigh(checkedMsg.from, "Recruiter already connected, ignoring msg")
             } else {
                 logHigh(checkedMsg.from, "Adding candidate")
-                recruiter.peer.addIceCandidate(checkedMsg.candidate)
+                recruiter.addIceCandidate(checkedMsg.candidate)
             }
         }
     }
