@@ -10,7 +10,6 @@ import messages.PeerMsgPart
 import messages.PeerMsgPartChecked
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
-import java.time.LocalDateTime
 
 class IncomingRecruiterMsgPartEvent(
     repository: SharedRepository, private val recruiterId: String, private val msg: ByteBuffer
@@ -34,7 +33,7 @@ class IncomingRecruiterMsgPartEvent(
 
     private fun handleCheckedMsgPart(peerMsgPart: PeerMsgPartChecked, recruiter: Recruiter){
         repository.logger.logP2PIncomingPart(LoggerLvl.HIGH, peerMsgPart, recruiterId)
-        if(peerMsgPart.total == 1.toLong()){
+        if(peerMsgPart.total == 1){
             redirectCompleteMsgToModule(peerMsgPart, recruiter)
         } else {
             handleMsgPart(peerMsgPart, recruiter)
@@ -54,7 +53,8 @@ class IncomingRecruiterMsgPartEvent(
     private fun handleMsgPart(msgPart: PeerMsgPartChecked, recruiter: Recruiter){
         var pendingMsg: PendingMsg? = recruiter.pendingMessages[msgPart.msgId]
         if(pendingMsg == null){
-            pendingMsg = PendingMsg(msgPart.total, LocalDateTime.now())
+            pendingMsg = PendingMsg(msgPart.total, repository, recruiterId)
+            recruiter.pendingMessages[msgPart.msgId] = pendingMsg
         }
         if(pendingMsg.total != msgPart.total){
             removeRecruiterOnError("Received msg part with discording total for msg", msgPart, recruiter)
@@ -62,7 +62,8 @@ class IncomingRecruiterMsgPartEvent(
             removeRecruiterOnError("Duplicate msg part for msg", msgPart, recruiter)
         } else {
             pendingMsg.parts[msgPart.part] = msgPart
-            if(pendingMsg.parts.size.toLong() == pendingMsg.total){
+            if(pendingMsg.parts.size == pendingMsg.total){
+                pendingMsg.cancelTimeout()
                 recruiter.pendingMessages.remove(msgPart.msgId)
                 pendingMsg.mergeMessages().ifPresentOrElse(
                     { redirectCompleteMsgToModule(it, recruiter) },

@@ -13,7 +13,7 @@ class SendPeerMsgToRecruiterEvent(
         repository.recruiters[recruiterId]?.let {
             if(it.peer.isConnected()){
                 log(LoggerLvl.MID, "Sending peer msg to Recruiter")
-                it.peer.sendMsg(msg)
+                it.peer.sendMsg(msg) // TODO check se ci è riuscito
             } else {
                 log(LoggerLvl.COMPLETE, "Recruiter's peer is not connected, postponing msg")
                 println("CASO MOLTO MOLTO MOLTO BRUTTO PORCO DIO")

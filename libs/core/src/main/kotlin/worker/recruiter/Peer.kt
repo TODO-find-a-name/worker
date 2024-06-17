@@ -12,19 +12,49 @@ import com.todo.todo.worker.utils.LoggerLvl
 import dev.onvoid.webrtc.*
 import messages.PeerMsg
 import java.nio.ByteBuffer
+import java.util.*
 
-class Peer(private val recruiterId: String, private val repository: SharedRepository) {
+class Peer(private val recruiterId: String, private val repository: SharedRepository, private val createdAt: Long) {
 
-    private val peer: RTCPeerConnection = createPeer()
+    private val timeoutTimer = Timer()
     private val parser = repository.parser
+    private val peer: RTCPeerConnection = createPeer()
+
     var dataChannel: RTCDataChannel? = null
 
-    fun sendMsg(msg: PeerMsg){
+    init {
+        timeoutTimer.schedule(
+            object : TimerTask() {
+                override fun run() {
+                    repository.lock.execute {
+                        if(repository.isRunning){
+                            if(!isConnected()){
+                                repository.removeRecruiter(recruiterId)
+                            }
+                        }
+                    }
+                }
+            },
+            repository.settings.recruitmentTimeoutMs
+        )
+    }
+
+    fun isConnected(): Boolean {
+        return peer.connectionState == RTCPeerConnectionState.CONNECTED
+    }
+
+    fun sendMsg(msg: PeerMsg): Boolean {
         if(dataChannel == null){
-            println("QUALCOSA è ANDATO MOLTO STORTO IL DATA CHANNEL è NULL")
-        }
-        msg.splitIntoParts(repository.settings.p2pPayloadSizeBytes).forEach {
-            dataChannel?.send(RTCDataChannelBuffer(ByteBuffer.wrap(parser.toJson(it).toByteArray()), false))
+            return false
+        } else {
+            try {
+                msg.splitIntoParts(repository.settings.p2pPayloadSizeBytes).forEach {
+                    dataChannel?.send(RTCDataChannelBuffer(ByteBuffer.wrap(parser.toJson(it).toByteArray()), false))
+                }
+            } catch(e: Exception){
+                return false
+            }
+            return true
         }
     }
 
@@ -55,10 +85,6 @@ class Peer(private val recruiterId: String, private val repository: SharedReposi
                 }
             }
         )
-    }
-
-    fun isConnected(): Boolean {
-        return peer.connectionState == RTCPeerConnectionState.CONNECTED
     }
 
     fun addIceCandidate(candidate: RTCIceCandidate){
@@ -93,14 +119,17 @@ class Peer(private val recruiterId: String, private val repository: SharedReposi
             )
         )
         return PeerConnectionFactory().createPeerConnection(
-            rtcConfiguration, RecruiterPeerConnectionObserver(recruiterId, repository, this)
+            rtcConfiguration, RecruiterPeerConnectionObserver(recruiterId, repository, this, timeoutTimer)
         )
     }
 
 }
 
 private class RecruiterPeerConnectionObserver(
-    private val recruiterId: String, private val repository: SharedRepository, private val peer: Peer
+    private val recruiterId: String,
+    private val repository: SharedRepository,
+    private val peer: Peer,
+    private val timeoutTimer: Timer
 ): PeerConnectionObserver {
 
     override fun onIceCandidate(candidate: RTCIceCandidate?) {
@@ -126,12 +155,17 @@ private class RecruiterPeerConnectionObserver(
     }
 
     override fun onDataChannel(dataChannel: RTCDataChannel?) {
-        dataChannel?.registerObserver(DataChannelObserver(dataChannel, repository, recruiterId))
+        dataChannel?.registerObserver(DataChannelObserver(dataChannel, repository, recruiterId, timeoutTimer))
     }
 
 }
 
-private class DataChannelObserver(val dataChannel: RTCDataChannel, val repository: SharedRepository, private val recruiterId: String) : RTCDataChannelObserver {
+private class DataChannelObserver(
+    val dataChannel: RTCDataChannel,
+    val repository: SharedRepository,
+    private val recruiterId: String,
+    private val timeoutTimer: Timer
+) : RTCDataChannelObserver {
     override fun onBufferedAmountChange(p0: Long) {
         //TODO("Not yet implemented")
         println("DATA CHANNEL OBSERVER ON BUFFERED AMOUNT CHANGE")
@@ -139,6 +173,7 @@ private class DataChannelObserver(val dataChannel: RTCDataChannel, val repositor
 
     override fun onStateChange() {
         if(dataChannel.state.equals(RTCDataChannelState.OPEN)){
+            timeoutTimer.cancel()
             repository.logger.logRegular(LoggerLvl.LOW, "Recruiter $recruiterId connected")
             repository.recruiters[recruiterId]?.peer?.dataChannel = dataChannel
         }

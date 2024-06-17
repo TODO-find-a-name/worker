@@ -17,6 +17,7 @@ class Worker(settings: WorkerSettings, modulePacks: List<WorkerModulePack>, view
 
     fun disconnect() {
         if(repository.isRunning && repository.socket.isConnected()){
+            repository.isRunning = false
             repository.socket.disconnect()
         }
     }

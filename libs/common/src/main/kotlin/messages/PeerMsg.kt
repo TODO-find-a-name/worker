@@ -1,7 +1,6 @@
 package messages
 
 import com.google.gson.annotations.SerializedName
-import java.nio.ByteBuffer
 import java.util.Optional
 import kotlin.math.ceil
 
@@ -22,8 +21,8 @@ open class PeerMsg(
         val result = mutableListOf<PeerMsgPart>()
         for(i in 0..< totalParts){
             val part = PeerMsgPart()
-            part.total = totalParts.toLong()
-            part.part = i.toLong()
+            part.total = totalParts
+            part.part = i
             part.msgId = msgId
             part.msgType = msgType
             part.module = module
@@ -48,8 +47,8 @@ class PeerMsgPart(){
     @SerializedName("jobId") var jobId: String? = null
     @SerializedName("jobType") var jobType: String? = null
     @SerializedName("payload") var payload: String? = null
-    @SerializedName("part") var part: Long? = null
-    @SerializedName("total") var total: Long? = null
+    @SerializedName("part") var part: Int? = null
+    @SerializedName("total") var total: Int? = null
 
     fun toChecked(): Optional<PeerMsgPartChecked>{
         if(
@@ -80,6 +79,6 @@ class PeerMsgPartChecked(
     jobId: String,
     jobType: String,
     payload: String,
-    val part: Long,
-    val total: Long
+    val part: Int,
+    val total: Int
 ): PeerMsg(msgId, msgType, module, jobId, jobType, payload)

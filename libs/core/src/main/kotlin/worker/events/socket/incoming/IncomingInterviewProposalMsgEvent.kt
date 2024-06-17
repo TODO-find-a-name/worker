@@ -32,7 +32,7 @@ class IncomingInterviewProposalMsgEvent(
             repository.logger.logSocketIncoming(
                 LoggerLvl.MID, SocketMsgType.INTERVIEW_PROPOSAL_NAME, recruiterId, "Creating new Recruiter"
             )
-            val recruiter = Recruiter(recruiterId, repository)
+            val recruiter = Recruiter(recruiterId, repository, System.currentTimeMillis())
             repository.recruiters[recruiterId] = recruiter
             recruiter.peer.setRemoteDescription(checkedMsg.sessionDescription)
         }

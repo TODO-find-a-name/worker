@@ -1,17 +1,39 @@
 package com.todo.todo.worker.recruiter
 
+import com.todo.todo.worker.SharedRepository
 import messages.PeerMsg
 import messages.PeerMsgPartChecked
-import java.time.LocalDateTime
 import java.util.*
 
-class PendingMsg(val total: Long, val tms: LocalDateTime) {
+class PendingMsg(val total: Int, val repository: SharedRepository, val recruiterId: String) {
 
-    val parts: MutableMap<Long, PeerMsgPartChecked> = mutableMapOf()
+    private val timeoutTimer = Timer()
+    val parts: MutableMap<Int, PeerMsgPartChecked> = mutableMapOf()
+
+    init {
+        timeoutTimer.schedule(
+            object : TimerTask() {
+                override fun run() {
+                    repository.lock.execute {
+                        if(repository.isRunning){
+                            if(parts.size < total && repository.recruiters.contains(recruiterId)){
+                                repository.removeRecruiter(recruiterId)
+                            }
+                        }
+                    }
+                }
+            },
+            repository.settings.recruitmentTimeoutMs
+        )
+    }
+
+    fun cancelTimeout(){
+        timeoutTimer.cancel()
+    }
 
     fun mergeMessages(): Optional<PeerMsg> {
         // assumes total has been checked
-        var i: Long = 0
+        var i = 0
         val sortedList = parts.toSortedMap().values
         if(sortedList.all { it.part == i++ }){
             val payload = sortedList.map { it.payload }.reduce { acc, payloadPart -> acc + payloadPart }
