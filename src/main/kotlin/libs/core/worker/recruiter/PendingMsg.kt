@@ -2,7 +2,7 @@ package libs.core.worker.recruiter
 
 import libs.core.worker.Repository
 import libs.common.messages.PeerMsg
-import libs.common.messages.PeerMsgPartChecked
+import libs.common.messages.PeerMsgPart
 import libs.core.worker.events.recruiter.messages.PendingMsgTimeoutEvent
 import libs.core.worker.utils.scheduleEvent
 import java.util.*
@@ -10,7 +10,7 @@ import java.util.*
 class PendingMsg(val total: Int, val repository: Repository, val recruiterId: String, msgId: String) {
 
     private val timer = Timer()
-    val parts: MutableMap<Int, PeerMsgPartChecked> = mutableMapOf()
+    val parts: MutableMap<Int, PeerMsgPart> = mutableMapOf()
 
     init {
         timer.scheduleEvent(

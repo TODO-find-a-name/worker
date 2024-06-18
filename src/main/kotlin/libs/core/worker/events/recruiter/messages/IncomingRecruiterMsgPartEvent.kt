@@ -5,8 +5,8 @@ import libs.core.worker.recruiter.PendingMsg
 import libs.core.worker.recruiter.Recruiter
 import libs.core.worker.utils.LoggerLvl
 import libs.common.messages.PeerMsg
+import libs.common.messages.PeerMsgPartParsable
 import libs.common.messages.PeerMsgPart
-import libs.common.messages.PeerMsgPartChecked
 import libs.core.worker.events.RecruiterEvent
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
@@ -17,7 +17,7 @@ class IncomingRecruiterMsgPartEvent(
 
     override fun handleImpl(recruiter: Recruiter) {
         val decoded = decodeByteBuffer(msg)
-        repository.parser.fromJson(decoded, PeerMsgPart::class.java).ifPresentOrElse(
+        repository.parser.fromJson(decoded, PeerMsgPartParsable::class.java).ifPresentOrElse(
             { msgPartParsed -> msgPartParsed.toChecked().ifPresentOrElse(
                 { handleCheckedMsgPart(it, recruiter) },
                 { removeRecruiterOnError("Parsed msg part does not contain all necessary values", recruiter) }
@@ -26,7 +26,7 @@ class IncomingRecruiterMsgPartEvent(
         )
     }
 
-    private fun handleCheckedMsgPart(peerMsgPart: PeerMsgPartChecked, recruiter: Recruiter){
+    private fun handleCheckedMsgPart(peerMsgPart: PeerMsgPart, recruiter: Recruiter){
         repository.logger.logP2PIncomingPart(LoggerLvl.HIGH, peerMsgPart, recruiterId)
         if(peerMsgPart.total == 1){
             redirectCompleteMsgToModule(peerMsgPart, recruiter)
@@ -45,7 +45,7 @@ class IncomingRecruiterMsgPartEvent(
         }
     }
 
-    private fun handleMsgPart(msgPart: PeerMsgPartChecked, recruiter: Recruiter){
+    private fun handleMsgPart(msgPart: PeerMsgPart, recruiter: Recruiter){
         var pendingMsg: PendingMsg? = recruiter.pendingMessages[msgPart.msgId]
         if(pendingMsg == null){
             pendingMsg = PendingMsg(msgPart.total, repository, recruiterId, msgPart.msgId)

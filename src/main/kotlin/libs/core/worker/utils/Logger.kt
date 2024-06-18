@@ -1,7 +1,7 @@
 package libs.core.worker.utils
 
 import libs.common.messages.PeerMsg
-import libs.common.messages.PeerMsgPartChecked
+import libs.common.messages.PeerMsgPart
 import java.time.LocalDateTime
 
 class Logger(settings: WorkerSettings) {
@@ -48,12 +48,12 @@ class Logger(settings: WorkerSettings) {
         }
     }
 
-    fun logP2PIncomingPart(lvl: LoggerLvl, p2PeerMsgPartChecked: PeerMsgPartChecked, from: String){
+    fun logP2PIncomingPart(lvl: LoggerLvl, p2PeerMsgPart: PeerMsgPart, from: String){
         log(
             lvl,
-            "Received p2p msg part with index " + p2PeerMsgPartChecked.part.toString() + " (total: " + p2PeerMsgPartChecked.total + ")",
-            "Incoming p2p msg ${p2PeerMsgPartChecked.msgType} from $from",
-            "Id: " + p2PeerMsgPartChecked.msgId
+            "Received p2p msg part with index " + p2PeerMsgPart.part.toString() + " (total: " + p2PeerMsgPart.total + ")",
+            "Incoming p2p msg ${p2PeerMsgPart.msgType} from $from",
+            "Id: " + p2PeerMsgPart.msgId
         )
     }
 

@@ -12,15 +12,15 @@ open class PeerMsg(
     val jobType: String,
     val payload: String
 ){
-    fun splitIntoParts(payloadSizeBytes: Int): List<PeerMsgPart> {
+    fun splitIntoParts(payloadSizeBytes: Int): List<PeerMsgPartParsable> {
         val payloadLen = payload.length
         var totalParts: Int = ceil(payloadLen.toDouble() / payloadSizeBytes).toInt()
         if(totalParts == 0){
             totalParts = 1
         }
-        val result = mutableListOf<PeerMsgPart>()
+        val result = mutableListOf<PeerMsgPartParsable>()
         for(i in 0..< totalParts){
-            val part = PeerMsgPart()
+            val part = PeerMsgPartParsable()
             part.total = totalParts
             part.part = i
             part.msgId = msgId
@@ -40,41 +40,7 @@ open class PeerMsg(
     }
 }
 
-class PeerMsgPart {
-    @SerializedName("msgId") var msgId: String? = null
-    @SerializedName("msgType") var msgType: String? = null
-    @SerializedName("module") var module: String? = null
-    @SerializedName("jobId") var jobId: String? = null
-    @SerializedName("jobType") var jobType: String? = null
-    @SerializedName("payload") var payload: String? = null
-    @SerializedName("part") var part: Int? = null
-    @SerializedName("total") var total: Int? = null
-
-    fun toChecked(): Optional<PeerMsgPartChecked>{
-        if(
-            msgId == null ||
-            msgType == null ||
-            module == null ||
-            jobId == null ||
-            jobType == null ||
-            payload == null ||
-            part == null ||
-            total == null
-        ){
-            return Optional.empty()
-        } else {
-            return Optional.of(
-                PeerMsgPartChecked(
-                msgId!!, msgType!!, module!!, jobId!!, jobType!!, payload!!, part!!, total!!
-            )
-            )
-        }
-
-    }
-
-}
-
-class PeerMsgPartChecked(
+class PeerMsgPart(
     msgId: String,
     msgType: String,
     module: String,
@@ -84,3 +50,27 @@ class PeerMsgPartChecked(
     val part: Int,
     val total: Int
 ): PeerMsg(msgId, msgType, module, jobId, jobType, payload)
+
+class PeerMsgPartParsable {
+    @SerializedName("msgId") var msgId: String? = null
+    @SerializedName("msgType") var msgType: String? = null
+    @SerializedName("module") var module: String? = null
+    @SerializedName("jobId") var jobId: String? = null
+    @SerializedName("jobType") var jobType: String? = null
+    @SerializedName("payload") var payload: String? = null
+    @SerializedName("part") var part: Int? = null
+    @SerializedName("total") var total: Int? = null
+
+    fun toChecked(): Optional<PeerMsgPart>{
+        return if(isSomethingAbsent()){
+            Optional.empty()
+        } else {
+            Optional.of(PeerMsgPart(msgId!!, msgType!!, module!!, jobId!!, jobType!!, payload!!, part!!, total!!))
+        }
+    }
+
+    private fun isSomethingAbsent(): Boolean{
+        return msgId == null || msgType == null || module == null || jobId == null || jobType == null ||
+                payload == null || part == null || total == null
+    }
+}
