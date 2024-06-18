@@ -4,9 +4,15 @@ import libs.core.worker.events.socket.messages.data.abstractions.SessionDescript
 import dev.onvoid.webrtc.RTCSessionDescription
 import java.util.*
 
-class InterviewProposalMsg: SessionDescriptionMsg(){
+data class InterviewProposalMsg(
+    val from: String,
+    val to: String,
+    val sessionDescription: RTCSessionDescription
+)
 
-    fun toChecked(): Optional<InterviewProposalMsgChecked> {
+class InterviewProposalMsgParsable: SessionDescriptionMsg(){
+
+    fun toChecked(): Optional<InterviewProposalMsg> {
         if(from == null || to == null || sessionDescription == null) {
             return Optional.empty()
         }
@@ -14,13 +20,7 @@ class InterviewProposalMsg: SessionDescriptionMsg(){
         if(rtcSessionDescription.isEmpty){
             return Optional.empty()
         }
-        return Optional.of(InterviewProposalMsgChecked(from!!, to!!, rtcSessionDescription.get()))
+        return Optional.of(InterviewProposalMsg(from!!, to!!, rtcSessionDescription.get()))
     }
 
 }
-
-data class InterviewProposalMsgChecked(
-    val from: String,
-    val to: String,
-    val sessionDescription: RTCSessionDescription
-)

@@ -2,16 +2,16 @@ package libs.core.worker.events.recruiter.state
 
 import dev.onvoid.webrtc.RTCPeerConnectionState
 import libs.core.worker.Repository
-import libs.core.worker.events.Event
-import libs.core.worker.events.RemoveRecruiterEvent
+import libs.core.worker.events.RecruiterEvent
+import libs.core.worker.recruiter.Recruiter
 
 class OnRTCPeerConnectionStateChange(
-    repository: Repository, private val recruiterId: String, private val state: RTCPeerConnectionState
-) : Event(repository) {
+    repository: Repository, recruiterId: String, private val state: RTCPeerConnectionState
+) : RecruiterEvent(repository, recruiterId) {
 
-    override fun handleImpl() {
+    override fun handleImpl(recruiter: Recruiter) {
         if(state == RTCPeerConnectionState.DISCONNECTED || state == RTCPeerConnectionState.FAILED){
-            RemoveRecruiterEvent(repository, recruiterId).handle()
+            repository.removeRecruiter(recruiter)
         }
     }
 

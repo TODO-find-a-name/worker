@@ -43,4 +43,9 @@ class Repository(
         recruiters.remove(id)?.disconnect()
     }
 
+    fun removeRecruiter(recruiter: Recruiter){
+        recruiters.remove(recruiter.recruiterId)
+        recruiter.disconnect()
+    }
+
 }

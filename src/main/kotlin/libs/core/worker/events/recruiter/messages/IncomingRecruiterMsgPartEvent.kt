@@ -1,51 +1,45 @@
 package libs.core.worker.events.recruiter.messages
 
 import libs.core.worker.Repository
-import libs.core.worker.events.Event
-import libs.core.worker.events.RemoveRecruiterEvent
 import libs.core.worker.recruiter.PendingMsg
 import libs.core.worker.recruiter.Recruiter
 import libs.core.worker.utils.LoggerLvl
 import libs.common.messages.PeerMsg
 import libs.common.messages.PeerMsgPart
 import libs.common.messages.PeerMsgPartChecked
+import libs.core.worker.events.RecruiterEvent
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
 class IncomingRecruiterMsgPartEvent(
-    repository: Repository, private val recruiterId: String, private val msg: ByteBuffer
-) : Event(repository) {
+    repository: Repository, recruiterId: String, private val msg: ByteBuffer
+) : RecruiterEvent(repository, recruiterId) {
 
-    override fun handleImpl() {
-        val recruiter = repository.recruiters[recruiterId]
-        if(recruiter == null){
-            println("recruiter not found on incoming p2p msg todo")
-        } else {
-            val decoded = decodeByteBuffer(msg)
-            repository.parser.fromJson(decoded, PeerMsgPart::class.java).ifPresentOrElse(
-                { msgPartParsed -> msgPartParsed.toChecked().ifPresentOrElse(
-                    { handleCheckedMsgPart(it, recruiter) },
-                    { removeRecruiterOnError("Parsed msg part does not contain all necessary values") }
-                ) },
-                { removeRecruiterOnError("$decoded\nMsg part could not be parsed") }
-            )
-        }
+    override fun handleImpl(recruiter: Recruiter) {
+        val decoded = decodeByteBuffer(msg)
+        repository.parser.fromJson(decoded, PeerMsgPart::class.java).ifPresentOrElse(
+            { msgPartParsed -> msgPartParsed.toChecked().ifPresentOrElse(
+                { handleCheckedMsgPart(it, recruiter) },
+                { removeRecruiterOnError("Parsed msg part does not contain all necessary values", recruiter) }
+            ) },
+            { removeRecruiterOnError("$decoded\nMsg part could not be parsed", recruiter) }
+        )
     }
 
     private fun handleCheckedMsgPart(peerMsgPart: PeerMsgPartChecked, recruiter: Recruiter){
         repository.logger.logP2PIncomingPart(LoggerLvl.HIGH, peerMsgPart, recruiterId)
         if(peerMsgPart.total == 1){
-            redirectCompleteMsgToModule(peerMsgPart)
+            redirectCompleteMsgToModule(peerMsgPart, recruiter)
         } else {
             handleMsgPart(peerMsgPart, recruiter)
         }
     }
 
-    private fun redirectCompleteMsgToModule(msg: PeerMsg) {
+    private fun redirectCompleteMsgToModule(msg: PeerMsg, recruiter: Recruiter) {
         repository.logger.logP2PIncomingComplete(LoggerLvl.MID, msg, recruiterId)
         val module = repository.modules[msg.module]
         if(module == null){
-            removeRecruiterOnError("Requested module not found", msg)
+            removeRecruiterOnError("Requested module not found", msg, recruiter)
         } else {
             module.incomingPeerMsg(recruiterId, msg)
         }
@@ -58,18 +52,18 @@ class IncomingRecruiterMsgPartEvent(
             recruiter.pendingMessages[msgPart.msgId] = pendingMsg
         }
         if(pendingMsg.total != msgPart.total){
-            removeRecruiterOnError("Received msg part with discording total for msg", msgPart)
+            removeRecruiterOnError("Received msg part with discording total for msg", msgPart, recruiter)
         } else if(pendingMsg.parts[msgPart.part] !== null){
-            removeRecruiterOnError("Duplicate msg part for msg", msgPart)
+            removeRecruiterOnError("Duplicate msg part for msg", msgPart, recruiter)
         } else {
             pendingMsg.parts[msgPart.part] = msgPart
             if(pendingMsg.parts.size == pendingMsg.total){
                 pendingMsg.cancelTimeout()
                 recruiter.pendingMessages.remove(msgPart.msgId)
                 pendingMsg.mergeMessages().ifPresentOrElse(
-                    { redirectCompleteMsgToModule(it) },
+                    { redirectCompleteMsgToModule(it, recruiter) },
                     { removeRecruiterOnError(
-                        "Total msg parts reached but parts were not sequential", msgPart
+                        "Total msg parts reached but parts were not sequential", msgPart, recruiter
                     ) }
                 )
             }
@@ -80,13 +74,13 @@ class IncomingRecruiterMsgPartEvent(
         return StandardCharsets.UTF_8.decode(byteBuffer).toString()
     }
 
-    private fun removeRecruiterOnError(log: String){
+    private fun removeRecruiterOnError(log: String, recruiter: Recruiter){
         repository.logger.errorRecruiter(recruiterId, "$log, removing Recruiter")
-        RemoveRecruiterEvent(repository, recruiterId).handle()
+        repository.removeRecruiter(recruiter)
     }
 
-    private fun removeRecruiterOnError(log: String, peerMsg: PeerMsg){
+    private fun removeRecruiterOnError(log: String, peerMsg: PeerMsg, recruiter: Recruiter){
         repository.logger.errorIncomingP2PMsg(recruiterId, peerMsg, "$log, removing Recruiter")
-        RemoveRecruiterEvent(repository, recruiterId).handle()
+        repository.removeRecruiter(recruiter)
     }
 }

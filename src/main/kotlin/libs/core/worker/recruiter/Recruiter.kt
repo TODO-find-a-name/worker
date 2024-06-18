@@ -7,19 +7,16 @@ import libs.core.worker.events.recruiter.negotiation.CreateAnswerNegotiationEven
 import libs.core.worker.events.socket.messages.outgoing.OutgoingInterviewAcceptanceMsgEvent
 import libs.core.worker.events.socket.messages.outgoing.OutgoingTeamDetailsMsgEvent
 import dev.onvoid.webrtc.*
-import libs.common.messages.PeerMsg
-import libs.core.worker.events.Event
+import libs.core.worker.events.recruiter.negotiation.AnswerCreatedNegotiationEvent
 import libs.core.worker.events.recruiter.state.OnDataChannelStateChangeEvent
 import libs.core.worker.events.recruiter.state.OnRTCPeerConnectionStateChange
 import libs.core.worker.events.recruiter.negotiation.RecruitmentTimeoutEvent
 import libs.core.worker.utils.scheduleEvent
-import java.nio.ByteBuffer
 import java.util.*
 
-class Recruiter(private val recruiterId: String, private val repository: Repository) {
+class Recruiter(val recruiterId: String, private val repository: Repository) {
 
     private val timer = Timer()
-    private val parser = repository.parser
     private val peer: RTCPeerConnection = createPeer()
 
     val pendingMessages: MutableMap<String, PendingMsg> = mutableMapOf()
@@ -33,33 +30,25 @@ class Recruiter(private val recruiterId: String, private val repository: Reposit
         return peer.connectionState == RTCPeerConnectionState.CONNECTED
     }
 
-    fun sendMsg(msg: PeerMsg): Boolean {
-        if(dataChannel == null || !isConnected()){
-            return false
-        }
-        try {
-            msg.splitIntoParts(repository.settings.p2pPayloadSizeBytes).forEach {
-                dataChannel?.send(RTCDataChannelBuffer(ByteBuffer.wrap(parser.toJson(it).toByteArray()), false))
-            }
-        } catch(e: Exception){
-            return false
-        }
-        return true
-    }
-
     fun setRemoteDescription(description: RTCSessionDescription){
         peer.setRemoteDescription(
             description,
-            OnDescriptionSet(recruiterId, repository, CreateAnswerNegotiationEvent(repository, recruiterId))
+            object : SetSessionDescriptionObserver {
+                override fun onSuccess() { CreateAnswerNegotiationEvent(repository, recruiterId).handle() }
+                override fun onFailure(s: String?) { RemoveRecruiterEvent(repository, recruiterId).handle() }
+            }
         )
     }
 
     fun setLocalDescription(description: RTCSessionDescription){
         peer.setLocalDescription(
             description,
-            OnDescriptionSet(
-                recruiterId, repository, OutgoingInterviewAcceptanceMsgEvent(repository, recruiterId, description)
-            )
+            object : SetSessionDescriptionObserver {
+                override fun onSuccess() {
+                    OutgoingInterviewAcceptanceMsgEvent(repository, recruiterId, description).handle()
+                }
+                override fun onFailure(s: String?) { RemoveRecruiterEvent(repository, recruiterId).handle() }
+            }
         )
     }
 
@@ -68,7 +57,7 @@ class Recruiter(private val recruiterId: String, private val repository: Reposit
             RTCAnswerOptions(),  // TODO ???
             object : CreateSessionDescriptionObserver {
                 override fun onSuccess(description: RTCSessionDescription?) {
-                    description?.let { repository.recruiters[recruiterId]?.setLocalDescription(description) }
+                    description?.let { AnswerCreatedNegotiationEvent(repository, recruiterId, description).handle() }
                 }
                 override fun onFailure(p0: String?) {
                     RemoveRecruiterEvent(repository, recruiterId).handle()
@@ -121,21 +110,6 @@ class Recruiter(private val recruiterId: String, private val repository: Reposit
                 }
             }
         )
-    }
-
-}
-
-private class OnDescriptionSet(
-    private val id: String, private val repository: Repository, private val onSuccessEvent: Event
-): SetSessionDescriptionObserver {
-
-    override fun onSuccess() {
-        onSuccessEvent.handle()
-    }
-
-    override fun onFailure(p0: String?) {
-        println("on description set failure")
-        RemoveRecruiterEvent(repository, id).handle()
     }
 
 }

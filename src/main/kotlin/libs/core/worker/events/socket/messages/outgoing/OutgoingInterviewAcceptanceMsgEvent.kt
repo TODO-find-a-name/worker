@@ -1,19 +1,20 @@
 package libs.core.worker.events.socket.messages.outgoing
 
 import libs.core.worker.Repository
-import libs.core.worker.events.Event
-import libs.core.worker.events.RemoveRecruiterEvent
 import libs.core.worker.events.socket.messages.data.InterviewAcceptanceMsg
 import libs.core.worker.events.socket.messages.data.abstractions.SocketMsgType
 import libs.core.worker.events.socket.messages.data.adapters.AgnosticRTCSessionDescription
 import libs.core.worker.utils.LoggerLvl
 import dev.onvoid.webrtc.RTCSessionDescription
+import libs.core.worker.events.RecruiterEvent
+import libs.core.worker.events.RemoveRecruiterEvent
+import libs.core.worker.recruiter.Recruiter
 
 class OutgoingInterviewAcceptanceMsgEvent(
-    repository: Repository, private val recruiterId: String, private val sessionDescription: RTCSessionDescription
-) : Event(repository) {
+    repository: Repository, recruiterId: String, private val sessionDescription: RTCSessionDescription
+) : RecruiterEvent(repository, recruiterId) {
 
-    override fun handleImpl() {
+    override fun handleImpl(recruiter: Recruiter) {
         AgnosticRTCSessionDescription.adaptConcrete(sessionDescription).ifPresent{
             repository.logger.logSocketOutgoing(
                 LoggerLvl.MID,

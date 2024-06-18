@@ -1,19 +1,17 @@
 package libs.core.worker.events.recruiter.messages
 
 import libs.core.worker.Repository
-import libs.core.worker.events.Event
-import libs.core.worker.events.RemoveRecruiterEvent
+import libs.core.worker.events.RecruiterEvent
+import libs.core.worker.recruiter.Recruiter
 
 class PendingMsgTimeoutEvent(
-    repository: Repository, private val recruiterId: String, private val msgId: String
-) : Event(repository) {
+    repository: Repository, recruiterId: String, private val msgId: String
+) : RecruiterEvent(repository, recruiterId) {
 
-    override fun handleImpl() {
-        repository.recruiters[recruiterId]?.let { recruiter ->
-            recruiter.pendingMessages[msgId]?.let { pendingMsg ->
-                if(pendingMsg.parts.size < pendingMsg.total){
-                    RemoveRecruiterEvent(repository, recruiterId).handle()
-                }
+    override fun handleImpl(recruiter: Recruiter) {
+        recruiter.pendingMessages[msgId]?.let { pendingMsg ->
+            if(pendingMsg.parts.size < pendingMsg.total){
+                repository.removeRecruiter(recruiter)
             }
         }
     }

@@ -8,10 +8,16 @@ import libs.core.worker.Repository
 import dev.onvoid.webrtc.RTCIceCandidate
 import java.util.Optional
 
-class TeamDetailsMsg: DirectMsg() {
+data class TeamDetailsMsg(
+    val from: String,
+    val to: String,
+    val candidate: RTCIceCandidate
+)
+
+class TeamDetailsMsgParsable: DirectMsg() {
     @SerializedName("candidate") var candidate: IceCandidateAdapter? = null
 
-    fun toChecked(): Optional<TeamDetailsMsgChecked>{
+    fun toChecked(): Optional<TeamDetailsMsg>{
         if(candidate == null || from == null || to == null){
             return Optional.empty()
         }
@@ -19,7 +25,7 @@ class TeamDetailsMsg: DirectMsg() {
         if(concreteCandidate.isEmpty){
             return Optional.empty()
         }
-        return Optional.of(TeamDetailsMsgChecked(from!!, to!!, concreteCandidate.get()))
+        return Optional.of(TeamDetailsMsg(from!!, to!!, concreteCandidate.get()))
     }
 
     companion object {
@@ -29,7 +35,7 @@ class TeamDetailsMsg: DirectMsg() {
             candidate: IceCandidateAdapter,
             onAck: (ack: Boolean) -> Any
         ){
-            val msg = TeamDetailsMsg()
+            val msg = TeamDetailsMsgParsable()
             msg.to = to
             msg.from = repository.socket.id()
             msg.candidate = candidate
@@ -37,9 +43,3 @@ class TeamDetailsMsg: DirectMsg() {
         }
     }
 }
-
-data class TeamDetailsMsgChecked(
-    val from: String,
-    val to: String,
-    val candidate: RTCIceCandidate
-)

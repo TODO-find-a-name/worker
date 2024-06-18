@@ -1,16 +1,16 @@
 package libs.core.worker.events.recruiter.negotiation
 
 import libs.core.worker.Repository
-import libs.core.worker.events.Event
+import libs.core.worker.events.RecruiterEvent
 import libs.core.worker.events.RemoveRecruiterEvent
+import libs.core.worker.recruiter.Recruiter
 
-class RecruitmentTimeoutEvent(repository: Repository, private val recruiterId: String) : Event(repository) {
+class RecruitmentTimeoutEvent(repository: Repository, recruiterId: String) : RecruiterEvent(repository, recruiterId) {
 
-    override fun handleImpl() {
-        repository.recruiters[recruiterId]?.let {
-            if(!it.isConnected()){
-                RemoveRecruiterEvent(repository, recruiterId).handle()
-            }
+    override fun handleImpl(recruiter: Recruiter) {
+        if(!recruiter.isConnected()){
+            recruiter.disconnect()
+            RemoveRecruiterEvent(repository, recruiterId).handle()
         }
     }
 
