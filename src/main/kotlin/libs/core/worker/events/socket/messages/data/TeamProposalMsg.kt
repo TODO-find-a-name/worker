@@ -1,4 +1,4 @@
-package libs.core.worker.socket.messages
+package libs.core.worker.events.socket.messages.data
 
 import com.google.gson.annotations.SerializedName
 import java.util.Optional

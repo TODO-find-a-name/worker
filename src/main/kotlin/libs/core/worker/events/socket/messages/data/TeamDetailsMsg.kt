@@ -1,15 +1,15 @@
-package libs.core.worker.socket.messages
+package libs.core.worker.events.socket.messages.data
 
 import com.google.gson.annotations.SerializedName
-import libs.core.worker.socket.messages.abstractions.DirectMsg
-import libs.core.worker.socket.messages.abstractions.SocketMsgType
-import libs.core.worker.socket.messages.data.AgnosticIceCandidate
-import libs.core.worker.SharedRepository
+import libs.core.worker.events.socket.messages.data.abstractions.DirectMsg
+import libs.core.worker.events.socket.messages.data.abstractions.SocketMsgType
+import libs.core.worker.events.socket.messages.data.adapters.IceCandidateAdapter
+import libs.core.worker.Repository
 import dev.onvoid.webrtc.RTCIceCandidate
 import java.util.Optional
 
 class TeamDetailsMsg: DirectMsg() {
-    @SerializedName("candidate") var candidate: AgnosticIceCandidate? = null
+    @SerializedName("candidate") var candidate: IceCandidateAdapter? = null
 
     fun toChecked(): Optional<TeamDetailsMsgChecked>{
         if(candidate == null || from == null || to == null){
@@ -24,9 +24,9 @@ class TeamDetailsMsg: DirectMsg() {
 
     companion object {
         fun send(
-            repository: SharedRepository,
+            repository: Repository,
             to: String,
-            candidate: AgnosticIceCandidate,
+            candidate: IceCandidateAdapter,
             onAck: (ack: Boolean) -> Any
         ){
             val msg = TeamDetailsMsg()

@@ -1,15 +1,15 @@
-package libs.core.worker.events.socket.incoming
+package libs.core.worker.events.socket.messages.incoming
 
 import libs.core.worker.recruiter.Recruiter
-import libs.core.worker.socket.messages.InterviewProposalMsg
-import libs.core.worker.SharedRepository
+import libs.core.worker.events.socket.messages.data.InterviewProposalMsg
+import libs.core.worker.Repository
 import libs.core.worker.events.Event
-import libs.core.worker.socket.messages.InterviewProposalMsgChecked
-import libs.core.worker.socket.messages.abstractions.SocketMsgType
+import libs.core.worker.events.socket.messages.data.InterviewProposalMsgChecked
+import libs.core.worker.events.socket.messages.data.abstractions.SocketMsgType
 import libs.core.worker.utils.LoggerLvl
 
 class IncomingInterviewProposalMsgEvent(
-    repository: SharedRepository, private val payload:String
+    repository: Repository, private val payload:String
 ) : Event(repository) {
 
     override fun handleImpl() {

@@ -1,6 +1,6 @@
-package libs.core.worker.socket.messages
+package libs.core.worker.events.socket.messages.data
 
-import libs.core.worker.socket.messages.abstractions.SessionDescriptionMsg
+import libs.core.worker.events.socket.messages.data.abstractions.SessionDescriptionMsg
 import dev.onvoid.webrtc.RTCSessionDescription
 import java.util.*
 

@@ -1,4 +1,4 @@
-package libs.core.worker.socket.messages.data
+package libs.core.worker.events.socket.messages.data.adapters
 
 import com.google.gson.annotations.SerializedName
 import dev.onvoid.webrtc.RTCSdpType

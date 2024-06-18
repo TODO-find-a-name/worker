@@ -1,16 +1,16 @@
-package libs.core.worker.events.socket.outgoing
+package libs.core.worker.events.socket.messages.outgoing
 
-import libs.core.worker.SharedRepository
+import libs.core.worker.Repository
 import libs.core.worker.events.Event
 import libs.core.worker.events.RemoveRecruiterEvent
-import libs.core.worker.socket.messages.InterviewAcceptanceMsg
-import libs.core.worker.socket.messages.abstractions.SocketMsgType
-import libs.core.worker.socket.messages.data.AgnosticRTCSessionDescription
+import libs.core.worker.events.socket.messages.data.InterviewAcceptanceMsg
+import libs.core.worker.events.socket.messages.data.abstractions.SocketMsgType
+import libs.core.worker.events.socket.messages.data.adapters.AgnosticRTCSessionDescription
 import libs.core.worker.utils.LoggerLvl
 import dev.onvoid.webrtc.RTCSessionDescription
 
 class OutgoingInterviewAcceptanceMsgEvent(
-    repository: SharedRepository, private val recruiterId: String, private val sessionDescription: RTCSessionDescription
+    repository: Repository, private val recruiterId: String, private val sessionDescription: RTCSessionDescription
 ) : Event(repository) {
 
     override fun handleImpl() {

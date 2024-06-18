@@ -6,18 +6,16 @@ import libs.common.module.WorkerModulePack
 
 class Worker(settings: WorkerSettings, modulePacks: List<WorkerModulePack>, viewCallbacks: ViewCallbacks) {
 
-    private val repository: SharedRepository = SharedRepository(settings, modulePacks, viewCallbacks)
+    private val repository: Repository = Repository(settings, modulePacks, viewCallbacks)
 
     fun connect() {
         if(!repository.isRunning && !repository.socket.isConnected()){
-            repository.isRunning = true
             repository.socket.connect()
         }
     }
 
     fun disconnect() {
         if(repository.isRunning && repository.socket.isConnected()){
-            repository.isRunning = false
             repository.socket.disconnect()
         }
     }

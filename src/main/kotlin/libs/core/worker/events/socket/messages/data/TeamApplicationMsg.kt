@@ -1,13 +1,13 @@
-package libs.core.worker.socket.messages
+package libs.core.worker.events.socket.messages.data
 
-import libs.core.worker.SharedRepository
-import libs.core.worker.socket.messages.abstractions.DirectMsg
-import libs.core.worker.socket.messages.abstractions.SocketMsgType
+import libs.core.worker.Repository
+import libs.core.worker.events.socket.messages.data.abstractions.DirectMsg
+import libs.core.worker.events.socket.messages.data.abstractions.SocketMsgType
 
 class TeamApplicationMsg: DirectMsg(){
     companion object {
         fun send(
-            repository: SharedRepository,
+            repository: Repository,
             to: String,
             onAck: (ack: Boolean) -> Any
         ){

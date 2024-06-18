@@ -1,15 +1,15 @@
-package libs.core.worker.events.socket.incoming
+package libs.core.worker.events.socket.messages.incoming
 
-import libs.core.worker.socket.messages.TeamProposalMsg
-import libs.core.worker.socket.messages.abstractions.SocketMsgType
-import libs.core.worker.SharedRepository
+import libs.core.worker.events.socket.messages.data.TeamProposalMsg
+import libs.core.worker.events.socket.messages.data.abstractions.SocketMsgType
+import libs.core.worker.Repository
 import libs.core.worker.events.Event
-import libs.core.worker.events.socket.outgoing.OutgoingTeamApplicationMsgEvent
-import libs.core.worker.socket.messages.TeamProposalMsgChecked
+import libs.core.worker.events.socket.messages.outgoing.OutgoingTeamApplicationMsgEvent
+import libs.core.worker.events.socket.messages.data.TeamProposalMsgChecked
 import libs.core.worker.utils.LoggerLvl
 
 class IncomingTeamProposalMsgEvent(
-    repository: SharedRepository, private val payload:String
+    repository: Repository, private val payload:String
 ) : Event(repository) {
 
     override fun handleImpl() {

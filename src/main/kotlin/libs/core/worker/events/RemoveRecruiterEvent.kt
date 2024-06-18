@@ -1,9 +1,9 @@
 package libs.core.worker.events
 
-import libs.core.worker.SharedRepository
+import libs.core.worker.Repository
 
 class RemoveRecruiterEvent(
-    repository: SharedRepository, private val id: String
+    repository: Repository, private val id: String
 ) : Event(repository) {
 
     override fun handleImpl() {

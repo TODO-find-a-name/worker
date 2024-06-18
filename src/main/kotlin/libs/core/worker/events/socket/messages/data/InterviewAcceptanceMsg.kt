@@ -1,14 +1,14 @@
-package libs.core.worker.socket.messages
+package libs.core.worker.events.socket.messages.data
 
-import libs.core.worker.socket.messages.abstractions.SessionDescriptionMsg
-import libs.core.worker.socket.messages.abstractions.SocketMsgType
-import libs.core.worker.socket.messages.data.AgnosticRTCSessionDescription
-import libs.core.worker.SharedRepository
+import libs.core.worker.events.socket.messages.data.abstractions.SessionDescriptionMsg
+import libs.core.worker.events.socket.messages.data.abstractions.SocketMsgType
+import libs.core.worker.events.socket.messages.data.adapters.AgnosticRTCSessionDescription
+import libs.core.worker.Repository
 
 class InterviewAcceptanceMsg: SessionDescriptionMsg() {
     companion object {
         fun send(
-            repository: SharedRepository,
+            repository: Repository,
             to: String,
             sessionDescription: AgnosticRTCSessionDescription,
             onAck: (ack: Boolean) -> Any

@@ -1,11 +1,11 @@
 package libs.core.worker.recruiter
 
-import libs.core.worker.SharedRepository
+import libs.core.worker.Repository
 import libs.common.messages.PeerMsg
 import libs.common.messages.PeerMsgPartChecked
 import java.util.*
 
-class PendingMsg(val total: Int, val repository: SharedRepository, val recruiterId: String) {
+class PendingMsg(val total: Int, val repository: Repository, val recruiterId: String) {
 
     private val timeoutTimer = Timer()
     val parts: MutableMap<Int, PeerMsgPartChecked> = mutableMapOf()

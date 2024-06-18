@@ -1,8 +1,8 @@
 package libs.core.worker.events
 
-import libs.core.worker.SharedRepository
+import libs.core.worker.Repository
 
-abstract class Event(val repository: SharedRepository) {
+abstract class Event(val repository: Repository) {
 
     fun handle(){
         repository.lock.execute {

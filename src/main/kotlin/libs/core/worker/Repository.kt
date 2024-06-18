@@ -1,7 +1,6 @@
 package libs.core.worker
 
 import libs.core.worker.recruiter.Recruiter
-import libs.core.worker.socket.Socket
 import libs.core.ViewCallbacks
 import libs.core.worker.events.RemoveRecruiterEvent
 import libs.core.worker.events.recruiter.SendPeerMsgToRecruiterEvent
@@ -12,7 +11,7 @@ import libs.core.worker.utils.WorkerSettings
 import libs.common.module.WorkerModule
 import libs.common.module.WorkerModulePack
 
-class SharedRepository(
+class Repository(
     val settings: WorkerSettings, modulePacks: List<WorkerModulePack>, val viewCallbacks: ViewCallbacks
 ) {
 
@@ -41,12 +40,7 @@ class SharedRepository(
     }
 
     fun removeRecruiter(id: String) {
-        recruiters.remove(id)?.let {
-            it.disconnect()
-            it.timeoutTimer.cancel()
-            it.pendingMessages.forEach{ pair -> pair.value.cancelTimeout() }
-            it.pendingMessages.clear()
-        }
+        recruiters.remove(id)?.disconnect()
     }
 
 }

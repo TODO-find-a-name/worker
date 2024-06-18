@@ -1,8 +1,7 @@
-package libs.core.worker.socket.messages.abstractions
+package libs.core.worker.events.socket.messages.data.abstractions
 
 import com.google.gson.annotations.SerializedName
-import libs.core.worker.socket.messages.abstractions.DirectMsg
-import libs.core.worker.socket.messages.data.AgnosticRTCSessionDescription
+import libs.core.worker.events.socket.messages.data.adapters.AgnosticRTCSessionDescription
 
 open class SessionDescriptionMsg: DirectMsg() {
     @SerializedName("sessionDescription") var sessionDescription: AgnosticRTCSessionDescription? = null

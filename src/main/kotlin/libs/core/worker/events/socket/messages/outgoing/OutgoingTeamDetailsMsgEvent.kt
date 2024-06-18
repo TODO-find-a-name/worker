@@ -1,15 +1,15 @@
-package libs.core.worker.events.socket.outgoing
+package libs.core.worker.events.socket.messages.outgoing
 
-import libs.core.worker.SharedRepository
+import libs.core.worker.Repository
 import libs.core.worker.events.Event
-import libs.core.worker.socket.messages.TeamDetailsMsg
-import libs.core.worker.socket.messages.abstractions.SocketMsgType
-import libs.core.worker.socket.messages.data.AgnosticIceCandidate
+import libs.core.worker.events.socket.messages.data.TeamDetailsMsg
+import libs.core.worker.events.socket.messages.data.abstractions.SocketMsgType
+import libs.core.worker.events.socket.messages.data.adapters.IceCandidateAdapter
 import libs.core.worker.utils.LoggerLvl
 import dev.onvoid.webrtc.RTCIceCandidate
 
 class OutgoingTeamDetailsMsgEvent(
-    repository: SharedRepository, private val recruiterId: String, private val candidate: RTCIceCandidate
+    repository: Repository, private val recruiterId: String, private val candidate: RTCIceCandidate
 ) : Event(repository) {
 
     override fun handleImpl() {
@@ -20,7 +20,7 @@ class OutgoingTeamDetailsMsgEvent(
             if(recruiter.isConnected()){
                 repository.logger.logSocketOutgoing(LoggerLvl.HIGH, SocketMsgType.TEAM_DETAILS_NAME, recruiterId, "Sending ice candidate")
                 TeamDetailsMsg.send(
-                    repository, recruiterId, AgnosticIceCandidate.adaptConcrete(candidate)
+                    repository, recruiterId, IceCandidateAdapter.adaptConcrete(candidate)
                 ){
                     repository.logger.logSocketOutgoingAck(
                         LoggerLvl.COMPLETE, SocketMsgType.TEAM_APPLICATION_NAME, recruiterId, it

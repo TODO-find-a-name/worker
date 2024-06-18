@@ -2,8 +2,7 @@
 Documentation is my mind, tests are performed by trial and error, perdoname madre por mi vida loca.
 
 ## Project structure
-This project contains actually various subprojects, trying to partition in different contexts that can be maintained separately.  
-The directories are structured as follows:
+Trying to partition the project in different contexts that can be maintained separately, the source directories are structured as follows:
 - __app__  
 Contains the actual application
 - __libs__  
@@ -22,7 +21,7 @@ Just use the Gradle wrapper from the project's main directory.
 
 ## Reminder
 - running it on openjdk21 on macos with M3 processor seems to produce problems
-- it is necessary to do some shit for the dependencies depending on the architecture in core's build.gradle.kts
+- it is necessary to do some shit for the dependencies depending on the architecture in build.gradle.kts
 
 ## TODOs
 Basically everything

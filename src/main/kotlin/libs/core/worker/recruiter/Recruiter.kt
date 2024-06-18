@@ -1,22 +1,22 @@
 package libs.core.worker.recruiter
 
-import libs.core.worker.SharedRepository
+import libs.core.worker.Repository
 import libs.core.worker.events.RemoveRecruiterEvent
 import libs.core.worker.events.recruiter.IncomingRecruiterMsgPartEvent
 import libs.core.worker.events.recruiter.negotiation.CreateAnswerNegotiationEvent
-import libs.core.worker.events.socket.outgoing.OutgoingInterviewAcceptanceMsgEvent
-import libs.core.worker.events.socket.outgoing.OutgoingTeamDetailsMsgEvent
+import libs.core.worker.events.socket.messages.outgoing.OutgoingInterviewAcceptanceMsgEvent
+import libs.core.worker.events.socket.messages.outgoing.OutgoingTeamDetailsMsgEvent
 import libs.core.worker.utils.LoggerLvl
 import dev.onvoid.webrtc.*
 import libs.common.messages.PeerMsg
 import java.nio.ByteBuffer
 import java.util.*
 
-class Recruiter(private val recruiterId: String, private val repository: SharedRepository) {
+class Recruiter(private val recruiterId: String, private val repository: Repository) {
 
     val pendingMessages: MutableMap<String, PendingMsg> = mutableMapOf()
 
-    val timeoutTimer = Timer()
+    private val timeoutTimer = Timer()
     private val parser = repository.parser
     private val peer: RTCPeerConnection = createPeer()
 
@@ -98,6 +98,9 @@ class Recruiter(private val recruiterId: String, private val repository: SharedR
             peer.close()
         }
         dataChannel = null
+        timeoutTimer.cancel()
+        pendingMessages.forEach{ pair -> pair.value.cancelTimeout() }
+        pendingMessages.clear()
         // TODO implement
     }
 
@@ -130,7 +133,7 @@ class Recruiter(private val recruiterId: String, private val repository: SharedR
 
 private class RecruiterPeerConnectionObserver(
     private val recruiterId: String,
-    private val repository: SharedRepository,
+    private val repository: Repository,
     private val recruiter: Recruiter,
     private val timeoutTimer: Timer
 ): PeerConnectionObserver {
@@ -158,7 +161,7 @@ private class RecruiterPeerConnectionObserver(
 
 private class DataChannelObserver(
     val dataChannel: RTCDataChannel,
-    val repository: SharedRepository,
+    val repository: Repository,
     private val recruiterId: String,
     private val timeoutTimer: Timer
 ) : RTCDataChannelObserver {
@@ -185,7 +188,7 @@ private class DataChannelObserver(
 }
 
 private abstract class OnDescriptionSet(
-    private val id: String, private val repository: SharedRepository
+    private val id: String, private val repository: Repository
 ): SetSessionDescriptionObserver {
 
     override fun onFailure(p0: String?) {
@@ -196,7 +199,7 @@ private abstract class OnDescriptionSet(
 }
 
 private class OnAnswerCreated(
-    private val id: String, private val repository: SharedRepository
+    private val id: String, private val repository: Repository
 ): CreateSessionDescriptionObserver{
 
     override fun onSuccess(description: RTCSessionDescription?) {

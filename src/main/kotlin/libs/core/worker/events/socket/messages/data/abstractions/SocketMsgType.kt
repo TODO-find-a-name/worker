@@ -1,4 +1,4 @@
-package libs.core.worker.socket.messages.abstractions
+package libs.core.worker.events.socket.messages.data.abstractions
 
 class SocketMsgType {
     companion object {

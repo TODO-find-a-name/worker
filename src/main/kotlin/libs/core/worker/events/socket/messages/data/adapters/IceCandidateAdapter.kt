@@ -1,10 +1,10 @@
-package libs.core.worker.socket.messages.data
+package libs.core.worker.events.socket.messages.data.adapters
 
 import com.google.gson.annotations.SerializedName
 import dev.onvoid.webrtc.RTCIceCandidate
 import java.util.Optional
 
-class AgnosticIceCandidate {
+class IceCandidateAdapter {
     @SerializedName("sdp") var sdp: String? = null
     @SerializedName("sdpMid") var sdpMid: String? = null
     @SerializedName("sdpMLineIndex") var sdpMLineIndex: Int? = null
@@ -21,8 +21,8 @@ class AgnosticIceCandidate {
     }
 
     companion object {
-        fun adaptConcrete(rtcIceCandidate: RTCIceCandidate): AgnosticIceCandidate {
-            val agnostic = AgnosticIceCandidate()
+        fun adaptConcrete(rtcIceCandidate: RTCIceCandidate): IceCandidateAdapter {
+            val agnostic = IceCandidateAdapter()
             agnostic.sdp = rtcIceCandidate.sdp
             agnostic.sdpMid = rtcIceCandidate.sdpMid
             agnostic.sdpMLineIndex = rtcIceCandidate.sdpMLineIndex

@@ -1,13 +1,13 @@
-package libs.core.worker.events.socket.outgoing
+package libs.core.worker.events.socket.messages.outgoing
 
-import libs.core.worker.SharedRepository
+import libs.core.worker.Repository
 import libs.core.worker.events.Event
-import libs.core.worker.socket.messages.TeamApplicationMsg
-import libs.core.worker.socket.messages.abstractions.SocketMsgType
+import libs.core.worker.events.socket.messages.data.TeamApplicationMsg
+import libs.core.worker.events.socket.messages.data.abstractions.SocketMsgType
 import libs.core.worker.utils.LoggerLvl
 
 class OutgoingTeamApplicationMsgEvent(
-    repository: SharedRepository, private val recruiterId: String
+    repository: Repository, private val recruiterId: String
 ) : Event(repository) {
 
     override fun handleImpl() {

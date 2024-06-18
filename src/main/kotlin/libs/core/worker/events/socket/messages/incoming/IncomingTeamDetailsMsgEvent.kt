@@ -1,13 +1,13 @@
-package libs.core.worker.events.socket.incoming
+package libs.core.worker.events.socket.messages.incoming
 
-import libs.core.worker.socket.messages.TeamDetailsMsg
-import libs.core.worker.SharedRepository
+import libs.core.worker.events.socket.messages.data.TeamDetailsMsg
+import libs.core.worker.Repository
 import libs.core.worker.events.Event
-import libs.core.worker.socket.messages.TeamDetailsMsgChecked
-import libs.core.worker.socket.messages.abstractions.SocketMsgType
+import libs.core.worker.events.socket.messages.data.TeamDetailsMsgChecked
+import libs.core.worker.events.socket.messages.data.abstractions.SocketMsgType
 import libs.core.worker.utils.LoggerLvl
 
-class IncomingTeamDetailsMsgEvent(repository: SharedRepository, private val payload:String) : Event(repository) {
+class IncomingTeamDetailsMsgEvent(repository: Repository, private val payload:String) : Event(repository) {
 
     override fun handleImpl() {
         repository.parser.fromJson(payload, TeamDetailsMsg::class.java).ifPresentOrElse(

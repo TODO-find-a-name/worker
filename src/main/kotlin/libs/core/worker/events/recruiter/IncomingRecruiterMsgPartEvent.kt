@@ -1,6 +1,6 @@
 package libs.core.worker.events.recruiter
 
-import libs.core.worker.SharedRepository
+import libs.core.worker.Repository
 import libs.core.worker.events.Event
 import libs.core.worker.events.RemoveRecruiterEvent
 import libs.core.worker.recruiter.PendingMsg
@@ -13,7 +13,7 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 
 class IncomingRecruiterMsgPartEvent(
-    repository: SharedRepository, private val recruiterId: String, private val msg: ByteBuffer
+    repository: Repository, private val recruiterId: String, private val msg: ByteBuffer
 ) : Event(repository) {
 
     override fun handleImpl() {

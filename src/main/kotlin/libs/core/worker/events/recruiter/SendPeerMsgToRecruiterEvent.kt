@@ -1,12 +1,12 @@
 package libs.core.worker.events.recruiter
 
-import libs.core.worker.SharedRepository
+import libs.core.worker.Repository
 import libs.core.worker.events.Event
 import libs.core.worker.utils.LoggerLvl
 import libs.common.messages.PeerMsg
 
 class SendPeerMsgToRecruiterEvent(
-    repository: SharedRepository, private val recruiterId: String, private val msg: PeerMsg
+    repository: Repository, private val recruiterId: String, private val msg: PeerMsg
 ): Event(repository) {
 
     override fun handleImpl() {
