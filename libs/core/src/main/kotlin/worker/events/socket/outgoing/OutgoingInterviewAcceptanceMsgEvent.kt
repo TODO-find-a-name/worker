@@ -2,7 +2,7 @@ package com.todo.todo.worker.events.socket.outgoing
 
 import com.todo.todo.worker.SharedRepository
 import com.todo.todo.worker.events.Event
-import com.todo.todo.worker.events.general.RemoveRecruiterEvent
+import com.todo.todo.worker.events.RemoveRecruiterEvent
 import com.todo.todo.worker.socket.messages.InterviewAcceptanceMsg
 import com.todo.todo.worker.socket.messages.abstractions.SocketMsgType
 import com.todo.todo.worker.socket.messages.data.AgnosticRTCSessionDescription
@@ -26,7 +26,7 @@ class OutgoingInterviewAcceptanceMsgEvent(
                     LoggerLvl.COMPLETE, SocketMsgType.INTERVIEW_ACCEPTANCE_NAME, recruiterId, ack
                 )
                 if(!ack){
-                    println("interview acceptance ack false")
+                    println("interview acceptance ack false") // TODO
                     RemoveRecruiterEvent(repository, recruiterId).handle()
                 }
             }

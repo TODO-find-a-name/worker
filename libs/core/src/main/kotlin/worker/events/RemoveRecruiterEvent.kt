@@ -1,7 +1,6 @@
-package com.todo.todo.worker.events.general
+package com.todo.todo.worker.events
 
 import com.todo.todo.worker.SharedRepository
-import com.todo.todo.worker.events.Event
 
 class RemoveRecruiterEvent(
     repository: SharedRepository, private val id: String

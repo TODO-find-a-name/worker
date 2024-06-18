@@ -2,7 +2,7 @@ package com.todo.todo.worker.events.recruiter
 
 import com.todo.todo.worker.SharedRepository
 import com.todo.todo.worker.events.Event
-import com.todo.todo.worker.events.general.RemoveRecruiterEvent
+import com.todo.todo.worker.events.RemoveRecruiterEvent
 import com.todo.todo.worker.recruiter.PendingMsg
 import com.todo.todo.worker.recruiter.Recruiter
 import com.todo.todo.worker.utils.LoggerLvl

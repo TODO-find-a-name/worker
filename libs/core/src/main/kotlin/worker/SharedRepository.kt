@@ -3,7 +3,7 @@ package com.todo.todo.worker
 import com.todo.todo.worker.recruiter.Recruiter
 import com.todo.todo.worker.socket.Socket
 import com.todo.todo.ViewCallbacks
-import com.todo.todo.worker.events.general.RemoveRecruiterEvent
+import com.todo.todo.worker.events.RemoveRecruiterEvent
 import com.todo.todo.worker.events.recruiter.SendPeerMsgToRecruiterEvent
 import com.todo.todo.worker.utils.JsonParser
 import com.todo.todo.worker.utils.Lock

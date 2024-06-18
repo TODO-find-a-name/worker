@@ -1,10 +1,10 @@
 package com.todo.todo.worker.events.socket.incoming
 
-import com.todo.todo.worker.socket.messages.TeamApplicationMsg
 import com.todo.todo.worker.socket.messages.TeamProposalMsg
 import com.todo.todo.worker.socket.messages.abstractions.SocketMsgType
 import com.todo.todo.worker.SharedRepository
 import com.todo.todo.worker.events.Event
+import com.todo.todo.worker.events.socket.outgoing.OutgoingTeamApplicationMsgEvent
 import com.todo.todo.worker.socket.messages.TeamProposalMsgChecked
 import com.todo.todo.worker.utils.LoggerLvl
 
@@ -29,14 +29,7 @@ class IncomingTeamProposalMsgEvent(
             logMidIncoming(recruiterId, "Already in contact with Recruiter, ignoring message")
         } else {
             logMidIncoming(recruiterId, "New Recruiter requested Team creation")
-            repository.logger.logSocketOutgoing(
-                LoggerLvl.HIGH, SocketMsgType.TEAM_APPLICATION_NAME, recruiterId, "Applying for team"
-            )
-            TeamApplicationMsg.send(repository, recruiterId){
-                repository.logger.logSocketOutgoingAck(
-                    LoggerLvl.COMPLETE, SocketMsgType.TEAM_APPLICATION_NAME, recruiterId, it
-                )
-            }
+            OutgoingTeamApplicationMsgEvent(repository, recruiterId).handle()
         }
     }
 

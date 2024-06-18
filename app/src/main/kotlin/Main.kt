@@ -11,7 +11,7 @@ fun main() {
         WorkerSettings(
             "http://localhost:8080",
             "fatate",
-            loggingLvl = LoggerLvl.LOW
+            loggingLvl = LoggerLvl.COMPLETE
         ),
         listOf(JsWorkerModulePack()),
         TerminalViewCallbacks()

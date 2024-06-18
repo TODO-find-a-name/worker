@@ -1,10 +1,11 @@
 package com.todo.todo.worker.recruiter
 
 import com.todo.todo.worker.SharedRepository
-import com.todo.todo.worker.events.general.RemoveRecruiterEvent
+import com.todo.todo.worker.events.RemoveRecruiterEvent
 import com.todo.todo.worker.events.recruiter.IncomingRecruiterMsgPartEvent
 import com.todo.todo.worker.events.recruiter.negotiation.CreateAnswerNegotiationEvent
 import com.todo.todo.worker.events.socket.outgoing.OutgoingInterviewAcceptanceMsgEvent
+import com.todo.todo.worker.events.socket.outgoing.OutgoingTeamDetailsMsgEvent
 import com.todo.todo.worker.socket.messages.TeamDetailsMsg
 import com.todo.todo.worker.socket.messages.abstractions.SocketMsgType
 import com.todo.todo.worker.socket.messages.data.AgnosticIceCandidate
@@ -138,18 +139,8 @@ private class RecruiterPeerConnectionObserver(
 ): PeerConnectionObserver {
 
     override fun onIceCandidate(candidate: RTCIceCandidate?) {
-        if(recruiter.isConnected()){
-            candidate?.let {
-                repository.logger.logSocketOutgoing(LoggerLvl.HIGH, SocketMsgType.TEAM_DETAILS_NAME, recruiterId, "Sending ice candidate")
-                TeamDetailsMsg.send(
-                    repository, recruiterId, AgnosticIceCandidate.adaptConcrete(candidate)
-                ){
-                    repository.logger.logSocketOutgoingAck(
-                        LoggerLvl.COMPLETE, SocketMsgType.TEAM_APPLICATION_NAME, recruiterId, it
-                    )
-                    // TODO remove Recruiter if ack false
-                }
-            }
+        candidate?.let {
+            OutgoingTeamDetailsMsgEvent(repository, recruiterId, it).handle()
         }
     }
 
