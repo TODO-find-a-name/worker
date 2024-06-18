@@ -10,11 +10,9 @@ class OnSocketConnectionEvent(repository: Repository, private val socket: Socket
 
     override fun handleImpl() {
         repository.logger.logRegular(LoggerLvl.LOW, "Connected to Broker as " + socket.id())
-        repository.isRunning = false
         repository.recruiters.keys.forEach{
             RemoveRecruiterEvent(repository, it).handle()
         }
-        repository.isRunning = true
         repository.viewCallbacks.onBrokerConnectionEstablished()
     }
 

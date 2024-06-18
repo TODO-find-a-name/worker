@@ -64,6 +64,7 @@ private fun createSocketIO(repository: Repository): SocketIo {
 
 private fun registerEventListeners(socket: SocketIo, repository: Repository){
     socket.on(SocketIo.EVENT_CONNECT) {
+        repository.isRunning = true
         OnSocketConnectionEvent(repository, socket).handle()
     }
     socket.on(SocketIo.EVENT_CONNECT_ERROR) {

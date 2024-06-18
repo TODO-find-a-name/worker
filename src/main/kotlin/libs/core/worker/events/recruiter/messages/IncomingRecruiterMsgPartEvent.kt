@@ -1,4 +1,4 @@
-package libs.core.worker.events.recruiter
+package libs.core.worker.events.recruiter.messages
 
 import libs.core.worker.Repository
 import libs.core.worker.events.Event
@@ -54,7 +54,7 @@ class IncomingRecruiterMsgPartEvent(
     private fun handleMsgPart(msgPart: PeerMsgPartChecked, recruiter: Recruiter){
         var pendingMsg: PendingMsg? = recruiter.pendingMessages[msgPart.msgId]
         if(pendingMsg == null){
-            pendingMsg = PendingMsg(msgPart.total, repository, recruiterId)
+            pendingMsg = PendingMsg(msgPart.total, repository, recruiterId, msgPart.msgId)
             recruiter.pendingMessages[msgPart.msgId] = pendingMsg
         }
         if(pendingMsg.total != msgPart.total){

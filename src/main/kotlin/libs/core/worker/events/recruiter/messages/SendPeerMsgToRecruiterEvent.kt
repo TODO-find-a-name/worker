@@ -1,4 +1,4 @@
-package libs.core.worker.events.recruiter
+package libs.core.worker.events.recruiter.messages
 
 import libs.core.worker.Repository
 import libs.core.worker.events.Event

@@ -3,7 +3,7 @@ package libs.core.worker
 import libs.core.worker.recruiter.Recruiter
 import libs.core.ViewCallbacks
 import libs.core.worker.events.RemoveRecruiterEvent
-import libs.core.worker.events.recruiter.SendPeerMsgToRecruiterEvent
+import libs.core.worker.events.recruiter.messages.SendPeerMsgToRecruiterEvent
 import libs.core.worker.utils.JsonParser
 import libs.core.worker.utils.Lock
 import libs.core.worker.utils.Logger

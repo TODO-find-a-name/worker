@@ -3,32 +3,23 @@ package libs.core.worker.recruiter
 import libs.core.worker.Repository
 import libs.common.messages.PeerMsg
 import libs.common.messages.PeerMsgPartChecked
+import libs.core.worker.events.recruiter.messages.PendingMsgTimeoutEvent
+import libs.core.worker.utils.scheduleEvent
 import java.util.*
 
-class PendingMsg(val total: Int, val repository: Repository, val recruiterId: String) {
+class PendingMsg(val total: Int, val repository: Repository, val recruiterId: String, msgId: String) {
 
-    private val timeoutTimer = Timer()
+    private val timer = Timer()
     val parts: MutableMap<Int, PeerMsgPartChecked> = mutableMapOf()
 
     init {
-        timeoutTimer.schedule(
-            object : TimerTask() {
-                override fun run() {
-                    repository.lock.execute {
-                        if(repository.isRunning){
-                            if(parts.size < total && repository.recruiters.contains(recruiterId)){
-                                repository.removeRecruiter(recruiterId)
-                            }
-                        }
-                    }
-                }
-            },
-            repository.settings.recruitmentTimeoutMs
+        timer.scheduleEvent(
+            PendingMsgTimeoutEvent(repository, recruiterId, msgId), repository.settings.recruitmentTimeoutMs
         )
     }
 
     fun cancelTimeout(){
-        timeoutTimer.cancel()
+        timer.cancel()
     }
 
     fun mergeMessages(): Optional<PeerMsg> {
