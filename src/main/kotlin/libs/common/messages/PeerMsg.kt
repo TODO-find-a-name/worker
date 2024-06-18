@@ -40,7 +40,7 @@ open class PeerMsg(
     }
 }
 
-class PeerMsgPart(){
+class PeerMsgPart {
     @SerializedName("msgId") var msgId: String? = null
     @SerializedName("msgType") var msgType: String? = null
     @SerializedName("module") var module: String? = null

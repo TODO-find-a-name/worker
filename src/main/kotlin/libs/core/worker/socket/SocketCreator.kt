@@ -9,6 +9,7 @@ import libs.core.worker.events.Event
 import libs.core.worker.utils.LoggerLvl
 import io.socket.client.IO
 import io.socket.engineio.client.transports.WebSocket
+import libs.core.worker.events.RemoveRecruiterEvent
 import java.net.URI
 import io.socket.client.Socket as SocketIo
 
@@ -33,21 +34,26 @@ class SocketCreator {
         private fun registerEventListeners(socket: SocketIo, repository: SharedRepository){
             socket.on(SocketIo.EVENT_CONNECT) {
                 repository.logger.logRegular(LoggerLvl.LOW, "Connected to Broker as " + socket.id())
-                // TODO remove workers, disconnect, etc...
+                reset(repository)
                 repository.isRunning = true
                 repository.viewCallbacks.onBrokerConnectionEstablished()
             }
             socket.on(SocketIo.EVENT_CONNECT_ERROR) {
                 repository.logger.logRegular(LoggerLvl.LOW, "Error while connecting to Broker")
-                repository.isRunning = false
-                // TODO remove workers, disconnect, etc...
+                reset(repository)
                 repository.viewCallbacks.onBrokerConnectionError()
             }
             socket.on(SocketIo.EVENT_DISCONNECT) {
                 repository.logger.logRegular(LoggerLvl.LOW, "Disconnection from Broker")
-                repository.isRunning = false
-                // TODO remove workers, disconnect, etc...
+                reset(repository)
                 repository.viewCallbacks.onBrokerDisconnection()
+            }
+        }
+
+        private fun reset(repository: SharedRepository){
+            repository.isRunning = false
+            repository.recruiters.keys.forEach{
+                RemoveRecruiterEvent(repository, it).handle()
             }
         }
 
@@ -73,7 +79,7 @@ class SocketCreator {
                 if(it !== null && it.size == 1){
                     repository.logger.logRegular(
                         LoggerLvl.COMPLETE,
-                        "Incoming " + SocketMsgType.toHumanReadableMsgType(msgType) + " socket msg, enqueueing its event"
+                        "Incoming " + SocketMsgType.toHumanReadableMsgType(msgType) + " socket msg"
                     )
                     eventStrategy(it[0].toString()).handle()
                 } else {
