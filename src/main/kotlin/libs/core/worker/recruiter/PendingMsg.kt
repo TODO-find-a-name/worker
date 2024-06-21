@@ -33,7 +33,6 @@ class PendingMsg(val total: Int, val repository: Repository, val recruiterId: St
                 PeerMsg(
                 base.msgId,
                 base.msgType,
-                base.module,
                 base.jobId,
                 base.jobType,
                 payload

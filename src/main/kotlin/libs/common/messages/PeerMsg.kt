@@ -7,7 +7,6 @@ import kotlin.math.ceil
 open class PeerMsg(
     val msgId: String,
     val msgType: String,
-    val module: String,
     val jobId: String,
     val jobType: String,
     val payload: String
@@ -25,7 +24,6 @@ open class PeerMsg(
             part.part = i
             part.msgId = msgId
             part.msgType = msgType
-            part.module = module
             part.jobId = jobId
             part.jobType = jobType
             val chunkStart = i * payloadSizeBytes
@@ -43,18 +41,16 @@ open class PeerMsg(
 class PeerMsgPart(
     msgId: String,
     msgType: String,
-    module: String,
     jobId: String,
     jobType: String,
     payload: String,
     val part: Int,
     val total: Int
-): PeerMsg(msgId, msgType, module, jobId, jobType, payload)
+): PeerMsg(msgId, msgType, jobId, jobType, payload)
 
 class PeerMsgPartParsable {
     @SerializedName("msgId") var msgId: String? = null
     @SerializedName("msgType") var msgType: String? = null
-    @SerializedName("module") var module: String? = null
     @SerializedName("jobId") var jobId: String? = null
     @SerializedName("jobType") var jobType: String? = null
     @SerializedName("payload") var payload: String? = null
@@ -65,12 +61,12 @@ class PeerMsgPartParsable {
         return if(isSomethingAbsent()){
             Optional.empty()
         } else {
-            Optional.of(PeerMsgPart(msgId!!, msgType!!, module!!, jobId!!, jobType!!, payload!!, part!!, total!!))
+            Optional.of(PeerMsgPart(msgId!!, msgType!!, jobId!!, jobType!!, payload!!, part!!, total!!))
         }
     }
 
     private fun isSomethingAbsent(): Boolean{
-        return msgId == null || msgType == null || module == null || jobId == null || jobType == null ||
+        return msgId == null || msgType == null || jobId == null || jobType == null ||
                 payload == null || part == null || total == null
     }
 }

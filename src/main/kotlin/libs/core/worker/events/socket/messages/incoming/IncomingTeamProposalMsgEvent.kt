@@ -20,14 +20,18 @@ class IncomingTeamProposalMsgEvent(repository: Repository, private val payload:S
         )
     }
 
-    private fun handleCheckedMsg(checkedMsg: TeamProposalMsg) {
-        val myId: String = repository.socket.id()
-        val recruiterId: String = checkedMsg.from
-        if(checkedMsg.ignore.contains(myId) || repository.recruiters.contains(recruiterId)){
-            logMidIncoming(recruiterId, "Already in contact with Recruiter, ignoring message")
+    private fun handleCheckedMsg(msg: TeamProposalMsg) {
+        if(repository.modules.contains(msg.module)){
+            val myId: String = repository.socket.id()
+            val recruiterId: String = msg.from
+            if(msg.ignore.contains(myId) || repository.recruiters.contains(recruiterId)){
+                logMidIncoming(recruiterId, "Already in contact with Recruiter, ignoring message")
+            } else {
+                logMidIncoming(recruiterId, "New Recruiter requested Team creation")
+                OutgoingTeamApplicationMsgEvent(repository, recruiterId).handle()
+            }
         } else {
-            logMidIncoming(recruiterId, "New Recruiter requested Team creation")
-            OutgoingTeamApplicationMsgEvent(repository, recruiterId).handle()
+            // TODO
         }
     }
 

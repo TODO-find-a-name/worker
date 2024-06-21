@@ -20,8 +20,13 @@ class IncomingInterviewProposalMsgEvent(repository: Repository, private val payl
         )
     }
 
-    private fun handleCheckedMsg(checkedMsg: InterviewProposalMsg) {
-        val recruiterId = checkedMsg.from
+    private fun handleCheckedMsg(msg: InterviewProposalMsg) {
+        val module = repository.modules[msg.module]
+        if (module == null) {
+            // TODO
+            return;
+        }
+        val recruiterId = msg.from
         if(repository.recruiters.contains(recruiterId)){
             repository.logger.errorSocket(
                 SocketMsgType.INTERVIEW_PROPOSAL_NAME, "Already working with Recruiter, discarding msg"
@@ -30,9 +35,9 @@ class IncomingInterviewProposalMsgEvent(repository: Repository, private val payl
             repository.logger.logSocketIncoming(
                 LoggerLvl.MID, SocketMsgType.INTERVIEW_PROPOSAL_NAME, recruiterId, "Creating new Recruiter"
             )
-            val recruiter = Recruiter(recruiterId, repository)
+            val recruiter = Recruiter(recruiterId, module, repository)
             repository.recruiters[recruiterId] = recruiter
-            recruiter.setRemoteDescription(checkedMsg.sessionDescription)
+            recruiter.setRemoteDescription(msg.sessionDescription)
         }
     }
 

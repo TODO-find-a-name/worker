@@ -37,12 +37,7 @@ class IncomingRecruiterMsgPartEvent(
 
     private fun redirectCompleteMsgToModule(msg: PeerMsg, recruiter: Recruiter) {
         repository.logger.logP2PIncomingComplete(LoggerLvl.MID, msg, recruiterId)
-        val module = repository.modules[msg.module]
-        if(module == null){
-            removeRecruiterOnError("Requested module not found", msg, recruiter)
-        } else {
-            module.incomingPeerMsg(recruiterId, msg)
-        }
+        recruiter.module.incomingPeerMsg(recruiterId, msg)
     }
 
     private fun handleMsgPart(msgPart: PeerMsgPart, recruiter: Recruiter){

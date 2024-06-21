@@ -86,8 +86,7 @@ class Logger(settings: WorkerSettings) {
         error(
             log,
             "Incoming p2p ${peerMsg.msgType} msg from $recruiterId",
-            "Id: ${peerMsg.msgId}",
-            "Module: ${peerMsg.module}"
+            "Id: ${peerMsg.msgId}"
         )
     }
 }

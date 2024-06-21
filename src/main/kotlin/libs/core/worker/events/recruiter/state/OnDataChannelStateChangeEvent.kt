@@ -16,6 +16,7 @@ class OnDataChannelStateChangeEvent(
         if(channel.state.equals(RTCDataChannelState.OPEN)){
             timer.cancel()
             repository.logger.logRegular(LoggerLvl.LOW, "Recruiter $recruiterId connected")
+            recruiter.module.addRecruiter(recruiterId)
             recruiter.dataChannel = channel
         }
     }

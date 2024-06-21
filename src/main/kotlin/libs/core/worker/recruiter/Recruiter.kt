@@ -7,6 +7,7 @@ import libs.core.worker.events.recruiter.negotiation.CreateAnswerNegotiationEven
 import libs.core.worker.events.socket.messages.outgoing.OutgoingInterviewAcceptanceMsgEvent
 import libs.core.worker.events.socket.messages.outgoing.OutgoingTeamDetailsMsgEvent
 import dev.onvoid.webrtc.*
+import libs.common.module.WorkerModule
 import libs.core.worker.events.recruiter.negotiation.AnswerCreatedNegotiationEvent
 import libs.core.worker.events.recruiter.state.OnDataChannelStateChangeEvent
 import libs.core.worker.events.recruiter.state.OnRTCPeerConnectionStateChange
@@ -14,7 +15,7 @@ import libs.core.worker.events.recruiter.negotiation.RecruitmentTimeoutEvent
 import libs.core.worker.utils.scheduleEvent
 import java.util.*
 
-class Recruiter(val recruiterId: String, private val repository: Repository) {
+class Recruiter(val recruiterId: String, val module: WorkerModule, private val repository: Repository) {
 
     private val timer = Timer()
     private val peer: RTCPeerConnection = createPeer()
@@ -76,6 +77,7 @@ class Recruiter(val recruiterId: String, private val repository: Repository) {
             dataChannel?.close()
             peer.close()
         }
+        module.removeRecruiter(recruiterId)
         dataChannel = null
         timer.cancel()
         pendingMessages.forEach{ pair -> pair.value.cancelTimeout() }

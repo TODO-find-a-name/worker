@@ -8,42 +8,58 @@ class JsWorkerModule(
     private val sendPeerMsgCallback: (recruiterId: String, msg: PeerMsg) -> Unit
 ) : WorkerModule {
 
-    var i = 0
+    // TODO mock implementation
+
+    private val counters = mutableMapOf<String, Int>()
+
+    override fun addRecruiter(recruiterId: String) {
+        if(counters.containsKey(recruiterId)) {
+            onCriticalErrorCallback(recruiterId)
+        } else {
+            counters[recruiterId] = 0
+        }
+    }
 
     override fun incomingPeerMsg(recruiterId: String, msg: PeerMsg) {
-        // TODO mock implementation
-        if(msg.msgType == "NEW_JOB"){
-            sendPeerMsgCallback(recruiterId, PeerMsg(
-                msg.msgId,
-                "NEW_JOB_ACK",
-                msg.module,
-                msg.jobId,
-                msg.jobType,
-                ""
-            ))
-        } else if (msg.msgType == "NEW_TASK") {
-            sendPeerMsgCallback(recruiterId, PeerMsg(
-                msg.msgId,
-                "TASK_RESULT",
-                msg.module,
-                msg.jobId,
-                msg.jobType,
-                "{\"id\":" + i++ + ",\"data\":[]}"
-            ))
-        } else if (msg.msgType == "STOP_JOB") {
-            sendPeerMsgCallback(recruiterId, PeerMsg(
-                msg.msgId,
-                "STOP_JOB_ACK",
-                msg.module,
-                msg.jobId,
-                msg.jobType,
-                ""
-            ))
+        val counter = counters[recruiterId]
+        if(counter == null) {
+            onCriticalErrorCallback(recruiterId)
+        } else {
+            when (msg.msgType) {
+                "NEW_JOB" -> {
+                    sendPeerMsgCallback(recruiterId, PeerMsg(
+                        msg.msgId,
+                        "NEW_JOB_ACK",
+                        msg.jobId,
+                        msg.jobType,
+                        ""
+                    ))
+                }
+                "NEW_TASK" -> {
+                    sendPeerMsgCallback(recruiterId, PeerMsg(
+                        msg.msgId,
+                        "TASK_RESULT",
+                        msg.jobId,
+                        msg.jobType,
+                        "{\"id\":$counter,\"data\":[]}"
+                    ))
+                    counters[recruiterId] = counter + 1
+                }
+                "STOP_JOB" -> {
+                    sendPeerMsgCallback(recruiterId, PeerMsg(
+                        msg.msgId,
+                        "STOP_JOB_ACK",
+                        msg.jobId,
+                        msg.jobType,
+                        ""
+                    ))
+                }
+            }
         }
     }
 
     override fun removeRecruiter(recruiterId: String) {
-        TODO("Not yet implemented")
+        counters.remove(recruiterId)
     }
 
 }
