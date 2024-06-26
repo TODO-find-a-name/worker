@@ -1,7 +1,7 @@
 package libs.core.worker.events
 
 import libs.core.worker.Repository
-import libs.core.worker.recruiter.Recruiter
+import libs.core.worker.Recruiter
 
 class RemoveRecruiterEvent(
     repository: Repository, recruiterId: String, private val log: String

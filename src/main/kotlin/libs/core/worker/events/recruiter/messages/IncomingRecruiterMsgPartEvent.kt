@@ -1,8 +1,8 @@
 package libs.core.worker.events.recruiter.messages
 
 import libs.core.worker.Repository
-import libs.core.worker.recruiter.PendingMsg
-import libs.core.worker.recruiter.Recruiter
+import libs.core.worker.utils.PendingMsg
+import libs.core.worker.Recruiter
 import libs.core.worker.utils.LoggerLvl
 import libs.common.messages.PeerMsg
 import libs.common.messages.PeerMsgPartParsable

@@ -1,6 +1,6 @@
 package libs.core.worker
 
-import libs.core.ViewCallbacks
+import libs.common.ViewCallbacks
 import libs.core.worker.utils.WorkerSettings
 import libs.common.module.WorkerModulePack
 

@@ -1,7 +1,6 @@
 package libs.core.worker
 
-import libs.core.worker.recruiter.Recruiter
-import libs.core.ViewCallbacks
+import libs.common.ViewCallbacks
 import libs.core.worker.events.RemoveRecruiterEvent
 import libs.core.worker.events.recruiter.messages.SendPeerMsgToRecruiterEvent
 import libs.core.worker.utils.JsonParser
@@ -38,6 +37,7 @@ class Repository(
                         "Module " + pack.id() + " had a critical error with a Recruiter",
                     ).handle()
                 }
+                .viewCallbacks(viewCallbacks)
                 .build()
             }
         )
@@ -46,12 +46,15 @@ class Repository(
     fun removeRecruiter(id: String, log: String) {
         logger.error("Removing Recruiter $id: $log")
         recruiters.remove(id)?.disconnect()
+        viewCallbacks.onRecruiterDisconnected(id)
     }
 
     fun removeRecruiter(recruiter: Recruiter, log: String){
-        logger.error("Removing Recruiter ${recruiter.recruiterId}: $log")
+        val id = recruiter.recruiterId
+        logger.error("Removing Recruiter ${id}: $log")
         recruiters.remove(recruiter.recruiterId)
         recruiter.disconnect()
+        viewCallbacks.onRecruiterDisconnected(id)
     }
 
 }

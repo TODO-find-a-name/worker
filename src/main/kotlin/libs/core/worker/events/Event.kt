@@ -1,7 +1,7 @@
 package libs.core.worker.events
 
 import libs.core.worker.Repository
-import libs.core.worker.recruiter.Recruiter
+import libs.core.worker.Recruiter
 
 abstract class Event(private val eventName: String, val repository: Repository) {
 

@@ -1,10 +1,9 @@
-package libs.core.worker.recruiter
+package libs.core.worker.utils
 
 import libs.core.worker.Repository
 import libs.common.messages.PeerMsg
 import libs.common.messages.PeerMsgPart
 import libs.core.worker.events.recruiter.messages.PendingMsgTimeoutEvent
-import libs.core.worker.utils.scheduleEvent
 import java.util.*
 
 class PendingMsg(val total: Int, val repository: Repository, val recruiterId: String, msgId: String) {
@@ -29,15 +28,13 @@ class PendingMsg(val total: Int, val repository: Repository, val recruiterId: St
         if(sortedList.all { it.part == i++ }){
             val payload = sortedList.map { it.payload }.reduce { acc, payloadPart -> acc + payloadPart }
             val base = parts[0]!!
-            return Optional.of(
-                PeerMsg(
+            return Optional.of(PeerMsg(
                 base.msgId,
                 base.msgType,
                 base.jobId,
                 base.jobType,
                 payload
-            )
-            )
+            ))
         } else {
             return Optional.empty()
         }

@@ -1,51 +1,67 @@
 package app
 
-import libs.core.ViewCallbacks
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
+import libs.common.ViewCallbacks
 import libs.core.worker.Worker
 import libs.core.worker.utils.LoggerLvl
 import libs.core.worker.utils.WorkerSettings
 import modules.js_module.JsWorkerModulePack
+import java.util.concurrent.CompletableFuture
 
 fun main() {
     Worker(
         WorkerSettings(
             "http://localhost:8080",
             "fatate",
-            loggingLvl = LoggerLvl.COMPLETE
+            loggingLvl = LoggerLvl.MID
         ),
         listOf(JsWorkerModulePack()),
-        TerminalViewCallbacks()
+        TerminalViewCallbacks(false)
     ).connect()
 }
 
-private class TerminalViewCallbacks : ViewCallbacks {
+private class TerminalViewCallbacks(private val print: Boolean) : ViewCallbacks {
 
-    override fun onBrokerConnectionEstablished() {
-        // println("Connection with Broker established")
+    private fun future(s: String): CompletableFuture<Unit> {
+        val future = CompletableFuture<Unit>()
+        runBlocking {
+            async {
+                if(print){
+                    println("\nView: $s\n")
+                }
+                future.complete(Unit)
+            }
+        }
+        return future
     }
 
-    override fun onBrokerConnectionError() {
-        // println("Error while trying to connect with Broker")
+    override fun onBrokerConnectionEstablished(): CompletableFuture<Unit> {
+        return future("Connection with Broker established")
     }
 
-    override fun onBrokerDisconnection() {
-        // println("Broker disconnected")
+    override fun onBrokerConnectionError(): CompletableFuture<Unit> {
+        return future("Broker connection error")
     }
 
-    override fun onRecruiterConnected(id: String) {
-        // println("Recruiter $id connected")
+    override fun onBrokerDisconnection(): CompletableFuture<Unit> {
+        return future("Broker disconnection")
     }
 
-    override fun onRecruiterDisconnected(id: String) {
-        // println("Recruiter $id disconnected")
+    override fun onRecruiterConnected(id: String): CompletableFuture<Unit> {
+        return future("Recruiter $id connected")
     }
 
-    override fun onJobStarted(recruiterId: String, jobId: String) {
-        // println("Recruiter $recruiterId started a new job $jobId")
+    override fun onRecruiterDisconnected(id: String): CompletableFuture<Unit> {
+        return future("Recruiter $id disconnected")
     }
 
-    override fun onJobEnded(recruiterId: String, jobId: String) {
-        // println("Recruiter $recruiterId concluded a new job $jobId")
+    override fun onJobStarted(recruiterId: String, jobId: String): CompletableFuture<Unit> {
+        return future("Recruiter $recruiterId started job $jobId")
+    }
+
+    override fun onJobEnded(recruiterId: String, jobId: String): CompletableFuture<Unit> {
+        return future("Recruiter $recruiterId ended job $jobId")
     }
 
 }

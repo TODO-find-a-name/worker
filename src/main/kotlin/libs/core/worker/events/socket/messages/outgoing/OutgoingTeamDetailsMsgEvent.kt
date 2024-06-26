@@ -8,7 +8,7 @@ import libs.core.worker.utils.LoggerLvl
 import dev.onvoid.webrtc.RTCIceCandidate
 import libs.core.worker.events.RecruiterEvent
 import libs.core.worker.events.RemoveRecruiterEvent
-import libs.core.worker.recruiter.Recruiter
+import libs.core.worker.Recruiter
 
 class OutgoingTeamDetailsMsgEvent(
     repository: Repository, recruiterId: String, private val candidate: RTCIceCandidate

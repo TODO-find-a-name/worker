@@ -1,12 +1,14 @@
 package modules.js_module
 
+import libs.common.ViewCallbacks
 import libs.common.messages.PeerMsg
 import libs.common.module.WorkerModule
 
 class JsWorkerModule(
     private val id: String,
     private val onCriticalErrorCallback: (recruiterId: String) -> Unit,
-    private val sendPeerMsgCallback: (recruiterId: String, msg: PeerMsg) -> Unit
+    private val sendPeerMsgCallback: (recruiterId: String, msg: PeerMsg) -> Unit,
+    private val viewCallbacks: ViewCallbacks
 ) : WorkerModule {
 
     // TODO mock implementation
@@ -32,6 +34,7 @@ class JsWorkerModule(
         } else {
             when (msg.msgType) {
                 "NEW_JOB" -> {
+                    viewCallbacks.onJobStarted(recruiterId, msg.jobId)
                     sendPeerMsgCallback(recruiterId, PeerMsg(
                         msg.msgId,
                         "NEW_JOB_ACK",
@@ -51,6 +54,7 @@ class JsWorkerModule(
                     counters[recruiterId] = counter + 1
                 }
                 "STOP_JOB" -> {
+                    viewCallbacks.onJobEnded(recruiterId, msg.jobId)
                     sendPeerMsgCallback(recruiterId, PeerMsg(
                         msg.msgId,
                         "STOP_JOB_ACK",

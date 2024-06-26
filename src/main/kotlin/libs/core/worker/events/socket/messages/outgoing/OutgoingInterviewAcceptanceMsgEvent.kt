@@ -8,7 +8,7 @@ import libs.core.worker.utils.LoggerLvl
 import dev.onvoid.webrtc.RTCSessionDescription
 import libs.core.worker.events.RecruiterEvent
 import libs.core.worker.events.RemoveRecruiterEvent
-import libs.core.worker.recruiter.Recruiter
+import libs.core.worker.Recruiter
 
 class OutgoingInterviewAcceptanceMsgEvent(
     repository: Repository, recruiterId: String, private val sessionDescription: RTCSessionDescription

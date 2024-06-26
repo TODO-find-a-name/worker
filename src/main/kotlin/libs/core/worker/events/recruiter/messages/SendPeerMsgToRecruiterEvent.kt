@@ -5,7 +5,7 @@ import libs.core.worker.Repository
 import libs.core.worker.utils.LoggerLvl
 import libs.common.messages.PeerMsg
 import libs.core.worker.events.RecruiterEvent
-import libs.core.worker.recruiter.Recruiter
+import libs.core.worker.Recruiter
 import libs.core.worker.utils.JsonParser
 import java.nio.ByteBuffer
 
