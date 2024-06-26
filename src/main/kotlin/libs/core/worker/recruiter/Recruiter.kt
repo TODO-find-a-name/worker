@@ -9,9 +9,9 @@ import libs.core.worker.events.socket.messages.outgoing.OutgoingTeamDetailsMsgEv
 import dev.onvoid.webrtc.*
 import libs.common.module.WorkerModule
 import libs.core.worker.events.recruiter.negotiation.AnswerCreatedNegotiationEvent
-import libs.core.worker.events.recruiter.state.OnDataChannelStateChangeEvent
-import libs.core.worker.events.recruiter.state.OnRTCPeerConnectionStateChange
 import libs.core.worker.events.recruiter.negotiation.RecruitmentTimeoutEvent
+import libs.core.worker.events.recruiter.state.OnDataChannelOpenEvent
+import libs.core.worker.utils.LoggerLvl
 import libs.core.worker.utils.scheduleEvent
 import java.util.*
 
@@ -94,13 +94,19 @@ class Recruiter(val recruiterId: String, val module: WorkerModule, private val r
                 }
 
                 override fun onConnectionChange(state: RTCPeerConnectionState?) {
-                    state?.let { OnRTCPeerConnectionStateChange(repository, recruiterId, it).handle() }
+                    state?.let {
+                        if(it == RTCPeerConnectionState.DISCONNECTED || it == RTCPeerConnectionState.FAILED){
+                            RemoveRecruiterEvent(repository, recruiterId).handle()
+                        }
+                    }
                 }
 
-                override fun onDataChannel(dataChannel: RTCDataChannel?) {
-                    dataChannel?.registerObserver(object : RTCDataChannelObserver {
+                override fun onDataChannel(channel: RTCDataChannel?) {
+                    channel?.registerObserver(object : RTCDataChannelObserver {
                         override fun onStateChange() {
-                            OnDataChannelStateChangeEvent(repository, recruiterId, dataChannel, timer).handle()
+                            if(channel.state.equals(RTCDataChannelState.OPEN)){
+                                OnDataChannelOpenEvent(repository, recruiterId, channel, timer).handle()
+                            }
                         }
 
                         override fun onMessage(buffer: RTCDataChannelBuffer?) {
