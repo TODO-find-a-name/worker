@@ -4,7 +4,6 @@ import kotlinx.coroutines.*
 import libs.common.ViewCallbacks
 import libs.common.messages.PeerMsg
 import libs.common.module.WorkerModule
-import libs.core.worker.Recruiter
 import java.util.concurrent.CompletableFuture
 
 class JsWorkerModule(

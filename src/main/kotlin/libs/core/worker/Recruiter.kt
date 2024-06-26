@@ -18,10 +18,10 @@ class Recruiter(val recruiterId: String, val module: WorkerModule, private val r
 
     private val timer = Timer()
     private val peer: RTCPeerConnection = createPeer()
-    var isConnected = false
 
     val pendingMessages: MutableMap<String, PendingMsg> = mutableMapOf()
     var dataChannel: RTCDataChannel? = null
+    var isConnected = false
 
     init {
         timer.scheduleEvent(RecruitmentTimeoutEvent(repository, recruiterId), repository.settings.recruitmentTimeoutMs)
@@ -72,7 +72,6 @@ class Recruiter(val recruiterId: String, val module: WorkerModule, private val r
     }
 
     fun disconnect(){
-        //println("disconnecting recruiter $recruiterId")
         isConnected = false
         dataChannel?.close()
         peer.close()
@@ -81,7 +80,6 @@ class Recruiter(val recruiterId: String, val module: WorkerModule, private val r
         timer.cancel()
         pendingMessages.forEach{ pair -> pair.value.cancelTimeout() }
         pendingMessages.clear()
-        // TODO implement
     }
 
     private fun createPeer(): RTCPeerConnection {
