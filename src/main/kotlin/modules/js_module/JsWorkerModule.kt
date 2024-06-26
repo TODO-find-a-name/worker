@@ -1,8 +1,11 @@
 package modules.js_module
 
+import kotlinx.coroutines.*
 import libs.common.ViewCallbacks
 import libs.common.messages.PeerMsg
 import libs.common.module.WorkerModule
+import libs.core.worker.Recruiter
+import java.util.concurrent.CompletableFuture
 
 class JsWorkerModule(
     private val id: String,
@@ -19,52 +22,57 @@ class JsWorkerModule(
         return id
     }
 
-    override fun addRecruiter(recruiterId: String) {
+    override fun addRecruiter(recruiterId: String): Boolean {
         if(counters.containsKey(recruiterId)) {
-            onCriticalErrorCallback(recruiterId)
-        } else {
-            counters[recruiterId] = 0
+            return false
         }
+        counters[recruiterId] = 0
+        return true
     }
 
-    override fun incomingPeerMsg(recruiterId: String, msg: PeerMsg) {
-        val counter = counters[recruiterId]
-        if(counter == null) {
-            onCriticalErrorCallback(recruiterId)
-        } else {
-            when (msg.msgType) {
-                "NEW_JOB" -> {
-                    viewCallbacks.onJobStarted(recruiterId, msg.jobId)
-                    sendPeerMsgCallback(recruiterId, PeerMsg(
-                        msg.msgId,
-                        "NEW_JOB_ACK",
-                        msg.jobId,
-                        msg.jobType,
-                        ""
-                    ))
-                }
-                "NEW_TASK" -> {
-                    sendPeerMsgCallback(recruiterId, PeerMsg(
-                        msg.msgId,
-                        "TASK_RESULT",
-                        msg.jobId,
-                        msg.jobType,
-                        "{\"id\":$counter,\"data\":[]}"
-                    ))
-                    counters[recruiterId] = counter + 1
-                }
-                "STOP_JOB" -> {
-                    viewCallbacks.onJobEnded(recruiterId, msg.jobId)
-                    sendPeerMsgCallback(recruiterId, PeerMsg(
-                        msg.msgId,
-                        "STOP_JOB_ACK",
-                        msg.jobId,
-                        msg.jobType,
-                        ""
-                    ))
+    @OptIn(DelicateCoroutinesApi::class)
+    override fun incomingPeerMsg(recruiterId: String, msg: PeerMsg): CompletableFuture<Unit> {
+        val future = CompletableFuture<Unit>()
+        GlobalScope.launch {
+            val counter = counters[recruiterId]
+            if(counter == null) {
+                onCriticalErrorCallback(recruiterId)
+            } else {
+                when (msg.msgType) {
+                    "NEW_JOB" -> {
+                        viewCallbacks.onJobStarted(recruiterId, msg.jobId)
+                        sendPeerMsgCallback(recruiterId, PeerMsg(
+                            msg.msgId,
+                            "NEW_JOB_ACK",
+                            msg.jobId,
+                            msg.jobType,
+                            ""
+                        ))
+                    }
+                    "NEW_TASK" -> {
+                        sendPeerMsgCallback(recruiterId, PeerMsg(
+                            msg.msgId,
+                            "TASK_RESULT",
+                            msg.jobId,
+                            msg.jobType,
+                            "{\"id\":$counter,\"data\":[]}"
+                        ))
+                        counters[recruiterId] = counter + 1
+                    }
+                    "STOP_JOB" -> {
+                        viewCallbacks.onJobEnded(recruiterId, msg.jobId)
+                        sendPeerMsgCallback(recruiterId, PeerMsg(
+                            msg.msgId,
+                            "STOP_JOB_ACK",
+                            msg.jobId,
+                            msg.jobType,
+                            ""
+                        ))
+                    }
                 }
             }
         }
+        return future
     }
 
     override fun removeRecruiter(recruiterId: String) {

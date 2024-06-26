@@ -1,7 +1,6 @@
 package app
 
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import libs.common.ViewCallbacks
 import libs.core.worker.Worker
 import libs.core.worker.utils.LoggerLvl
@@ -14,7 +13,7 @@ fun main() {
         WorkerSettings(
             "http://localhost:8080",
             "fatate",
-            loggingLvl = LoggerLvl.MID
+            loggingLvl = LoggerLvl.COMPLETE
         ),
         listOf(JsWorkerModulePack()),
         TerminalViewCallbacks(false)
@@ -23,15 +22,14 @@ fun main() {
 
 private class TerminalViewCallbacks(private val print: Boolean) : ViewCallbacks {
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun future(s: String): CompletableFuture<Unit> {
         val future = CompletableFuture<Unit>()
-        runBlocking {
-            async {
-                if(print){
-                    println("\nView: $s\n")
-                }
-                future.complete(Unit)
+        GlobalScope.launch {
+            if(print){
+                println("\nView: $s\n")
             }
+            future.complete(Unit)
         }
         return future
     }

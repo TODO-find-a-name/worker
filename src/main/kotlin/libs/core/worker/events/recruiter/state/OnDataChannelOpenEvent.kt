@@ -14,10 +14,13 @@ class OnDataChannelOpenEvent(
     override fun handleImpl(recruiter: Recruiter) {
         timer.cancel()
         recruiter.isConnected = true
-        repository.logger.log(LoggerLvl.LOW, "Recruiter $recruiterId connected")
-        recruiter.module.addRecruiter(recruiterId)
         recruiter.dataChannel = channel
-        repository.viewCallbacks.onRecruiterConnected(recruiterId)
+        if(recruiter.module.addRecruiter(recruiterId)){
+            repository.logger.log(LoggerLvl.LOW, "Recruiter $recruiterId connected")
+            repository.viewCallbacks.onRecruiterConnected(recruiterId)
+        } else {
+            repository.removeRecruiter(recruiter, "Tried to add Recruiter multiple times to module " + recruiter.module.id())
+        }
     }
 
 }
