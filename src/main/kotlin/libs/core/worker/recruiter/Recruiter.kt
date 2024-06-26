@@ -8,10 +8,9 @@ import libs.core.worker.events.socket.messages.outgoing.OutgoingInterviewAccepta
 import libs.core.worker.events.socket.messages.outgoing.OutgoingTeamDetailsMsgEvent
 import dev.onvoid.webrtc.*
 import libs.common.module.WorkerModule
-import libs.core.worker.events.recruiter.negotiation.AnswerCreatedNegotiationEvent
+import libs.core.worker.events.recruiter.negotiation.SetLocalDescriptionNegotiationEvent
 import libs.core.worker.events.recruiter.negotiation.RecruitmentTimeoutEvent
 import libs.core.worker.events.recruiter.state.OnDataChannelOpenEvent
-import libs.core.worker.utils.LoggerLvl
 import libs.core.worker.utils.scheduleEvent
 import java.util.*
 
@@ -19,6 +18,7 @@ class Recruiter(val recruiterId: String, val module: WorkerModule, private val r
 
     private val timer = Timer()
     private val peer: RTCPeerConnection = createPeer()
+    var isConnected = false
 
     val pendingMessages: MutableMap<String, PendingMsg> = mutableMapOf()
     var dataChannel: RTCDataChannel? = null
@@ -27,16 +27,14 @@ class Recruiter(val recruiterId: String, val module: WorkerModule, private val r
         timer.scheduleEvent(RecruitmentTimeoutEvent(repository, recruiterId), repository.settings.recruitmentTimeoutMs)
     }
 
-    fun isConnected(): Boolean {
-        return peer.connectionState == RTCPeerConnectionState.CONNECTED
-    }
-
     fun setRemoteDescription(description: RTCSessionDescription){
         peer.setRemoteDescription(
             description,
             object : SetSessionDescriptionObserver {
                 override fun onSuccess() { CreateAnswerNegotiationEvent(repository, recruiterId).handle() }
-                override fun onFailure(s: String?) { RemoveRecruiterEvent(repository, recruiterId).handle() }
+                override fun onFailure(s: String?) {
+                    RemoveRecruiterEvent(repository, recruiterId, "Error while setting remote description").handle()
+                }
             }
         )
     }
@@ -48,7 +46,9 @@ class Recruiter(val recruiterId: String, val module: WorkerModule, private val r
                 override fun onSuccess() {
                     OutgoingInterviewAcceptanceMsgEvent(repository, recruiterId, description).handle()
                 }
-                override fun onFailure(s: String?) { RemoveRecruiterEvent(repository, recruiterId).handle() }
+                override fun onFailure(s: String?) {
+                    RemoveRecruiterEvent(repository, recruiterId, "Error while setting local description").handle()
+                }
             }
         )
     }
@@ -58,10 +58,10 @@ class Recruiter(val recruiterId: String, val module: WorkerModule, private val r
             RTCAnswerOptions(),  // TODO ???
             object : CreateSessionDescriptionObserver {
                 override fun onSuccess(description: RTCSessionDescription?) {
-                    description?.let { AnswerCreatedNegotiationEvent(repository, recruiterId, description).handle() }
+                    description?.let { SetLocalDescriptionNegotiationEvent(repository, recruiterId, description).handle() }
                 }
                 override fun onFailure(p0: String?) {
-                    RemoveRecruiterEvent(repository, recruiterId).handle()
+                    RemoveRecruiterEvent(repository, recruiterId, "Error while creating answer").handle()
                 }
             }
         )
@@ -72,11 +72,10 @@ class Recruiter(val recruiterId: String, val module: WorkerModule, private val r
     }
 
     fun disconnect(){
-        println("disconnecting recruiter $recruiterId")
-        if(isConnected()){
-            dataChannel?.close()
-            peer.close()
-        }
+        //println("disconnecting recruiter $recruiterId")
+        isConnected = false
+        dataChannel?.close()
+        peer.close()
         module.removeRecruiter(recruiterId)
         dataChannel = null
         timer.cancel()
@@ -96,7 +95,7 @@ class Recruiter(val recruiterId: String, val module: WorkerModule, private val r
                 override fun onConnectionChange(state: RTCPeerConnectionState?) {
                     state?.let {
                         if(it == RTCPeerConnectionState.DISCONNECTED || it == RTCPeerConnectionState.FAILED){
-                            RemoveRecruiterEvent(repository, recruiterId).handle()
+                            RemoveRecruiterEvent(repository, recruiterId, "Connection lost").handle()
                         }
                     }
                 }

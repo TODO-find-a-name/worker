@@ -10,7 +10,7 @@ class JsWorkerModulePack : WorkerModulePack {
     }
 
     override fun builder(): WorkerModuleBuilder {
-        return JsWorkerModuleBuilder()
+        return JsWorkerModuleBuilder(id())
     }
 
 }

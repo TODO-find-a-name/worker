@@ -12,7 +12,7 @@ import libs.core.worker.recruiter.Recruiter
 
 class OutgoingInterviewAcceptanceMsgEvent(
     repository: Repository, recruiterId: String, private val sessionDescription: RTCSessionDescription
-) : RecruiterEvent(repository, recruiterId) {
+) : RecruiterEvent(OutgoingInterviewAcceptanceMsgEvent::class.simpleName.toString(), repository, recruiterId) {
 
     override fun handleImpl(recruiter: Recruiter) {
         AgnosticRTCSessionDescription.adaptConcrete(sessionDescription).ifPresent{
@@ -27,8 +27,11 @@ class OutgoingInterviewAcceptanceMsgEvent(
                     LoggerLvl.COMPLETE, SocketMsgType.INTERVIEW_ACCEPTANCE_NAME, recruiterId, ack
                 )
                 if(!ack){
-                    println("interview acceptance ack false") // TODO
-                    RemoveRecruiterEvent(repository, recruiterId).handle()
+                    RemoveRecruiterEvent(
+                        repository,
+                        recruiterId,
+                        "Ack is false on " + SocketMsgType.INTERVIEW_ACCEPTANCE_NAME + " sent msg"
+                    ).handle()
                 }
             }
         }

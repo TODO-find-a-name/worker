@@ -3,10 +3,10 @@ package libs.core.worker.events
 import libs.core.worker.Repository
 import libs.core.worker.recruiter.Recruiter
 
-abstract class Event(val repository: Repository) {
+abstract class Event(private val eventName: String, val repository: Repository) {
 
     fun handle(){
-        repository.lock.execute {
+        repository.lock.execute(eventName) {
             if(repository.isRunning){
                 handleImpl()
             }
@@ -17,7 +17,9 @@ abstract class Event(val repository: Repository) {
 
 }
 
-abstract class RecruiterEvent(repository: Repository, val recruiterId: String): Event(repository){
+abstract class RecruiterEvent(
+    eventName: String, repository: Repository, val recruiterId: String
+): Event(eventName, repository){
 
     override fun handleImpl(){
         repository.recruiters[recruiterId]?.let {
@@ -26,5 +28,11 @@ abstract class RecruiterEvent(repository: Repository, val recruiterId: String): 
     }
 
     abstract fun handleImpl(recruiter: Recruiter)
+
+}
+
+abstract class NestedEvent(val repository: Repository) {
+
+    abstract fun handle()
 
 }

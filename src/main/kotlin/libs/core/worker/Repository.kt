@@ -17,9 +17,9 @@ class Repository(
 
     var isRunning: Boolean = false
 
-    val lock: Lock = Lock()
-    val modules = createModules(modulePacks)
     val logger: Logger = Logger(settings)
+    val lock: Lock = Lock(logger)
+    val modules = createModules(modulePacks)
     val socket = Socket(this)
     val parser = JsonParser()
     val recruiters: MutableMap<String, Recruiter> = mutableMapOf()
@@ -29,21 +29,27 @@ class Repository(
             {pack -> pack.id()},
             {pack -> pack.builder()
                 .sendPeerMsg{ recruiterId, msg ->
-                    SendPeerMsgToRecruiterEvent(this, recruiterId, msg).handle()
+                    SendPeerMsgToRecruiterEvent(this, recruiterId, pack.id(), msg).handle()
                 }
                 .onCriticalError{ recruiterId ->
-                    RemoveRecruiterEvent(this, recruiterId).handle()
+                    RemoveRecruiterEvent(
+                        this,
+                        recruiterId,
+                        "Module " + pack.id() + " had a critical error with a Recruiter",
+                    ).handle()
                 }
                 .build()
             }
         )
     }
 
-    fun removeRecruiter(id: String) {
+    fun removeRecruiter(id: String, log: String) {
+        logger.error("Removing Recruiter $id: $log")
         recruiters.remove(id)?.disconnect()
     }
 
-    fun removeRecruiter(recruiter: Recruiter){
+    fun removeRecruiter(recruiter: Recruiter, log: String){
+        logger.error("Removing Recruiter ${recruiter.recruiterId}: $log")
         recruiters.remove(recruiter.recruiterId)
         recruiter.disconnect()
     }

@@ -9,11 +9,12 @@ import java.util.*
 
 class OnDataChannelOpenEvent(
     repository: Repository, recruiterId: String, private val channel: RTCDataChannel, private val timer: Timer
-) : RecruiterEvent(repository, recruiterId) {
+) : RecruiterEvent(OnDataChannelOpenEvent::class.simpleName.toString(), repository, recruiterId) {
 
     override fun handleImpl(recruiter: Recruiter) {
         timer.cancel()
-        repository.logger.logRegular(LoggerLvl.LOW, "Recruiter $recruiterId connected")
+        recruiter.isConnected = true
+        repository.logger.log(LoggerLvl.LOW, "Recruiter $recruiterId connected")
         recruiter.module.addRecruiter(recruiterId)
         recruiter.dataChannel = channel
     }

@@ -3,10 +3,11 @@ package libs.core.worker.events
 import libs.core.worker.Repository
 import libs.core.worker.recruiter.Recruiter
 
-class RemoveRecruiterEvent(repository: Repository, recruiterId: String) : RecruiterEvent(repository, recruiterId) {
+class RemoveRecruiterEvent(
+    repository: Repository, recruiterId: String, private val log: String
+) : RecruiterEvent(RemoveRecruiterEvent::class.simpleName.toString(), repository, recruiterId) {
 
     override fun handleImpl(recruiter: Recruiter) {
-        repository.recruiters.remove(recruiterId)
-        recruiter.disconnect()
+        repository.removeRecruiter(recruiter, log)
     }
 }

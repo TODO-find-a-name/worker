@@ -88,20 +88,17 @@ private fun registerMsgListeners(socket: SocketIo, repository: Repository){
 }
 
 private fun registerSpecificMsgListener(
-    socket: SocketIo,
-    repository: Repository,
-    msgType: String,
-    eventStrategy: (payload: String) -> Event
+    socket: SocketIo, repository: Repository, msgType: String, eventStrategy: (payload: String) -> Event
 ){
     socket.on(msgType){
         if(it !== null && it.size == 1){
-            repository.logger.logRegular(
+            repository.logger.log(
                 LoggerLvl.COMPLETE,
                 "Incoming " + SocketMsgType.toHumanReadableMsgType(msgType) + " socket msg"
             )
             eventStrategy(it[0].toString()).handle()
         } else {
-            repository.logger.errorSocket(
+            repository.logger.errorSocketMsg(
                 SocketMsgType.toHumanReadableMsgType(msgType),
                 "Incoming invalid msg, discarding it:\n " +
                         "payload == null is " + (it == null) +

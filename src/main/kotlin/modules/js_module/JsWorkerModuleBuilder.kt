@@ -4,7 +4,7 @@ import libs.common.messages.PeerMsg
 import libs.common.module.WorkerModule
 import libs.common.module.WorkerModuleBuilder
 
-class JsWorkerModuleBuilder : WorkerModuleBuilder {
+class JsWorkerModuleBuilder(private val id: String) : WorkerModuleBuilder {
 
     private var onCriticalErrorCallback: ((recruiterId: String) -> Unit)? = null
     private var sendPeerMsgCallback: ((recruiterId: String, msg: PeerMsg) -> Unit)? = null
@@ -21,7 +21,7 @@ class JsWorkerModuleBuilder : WorkerModuleBuilder {
 
     override fun build(): WorkerModule {
         return JsWorkerModule(
-            this.onCriticalErrorCallback!!, this.sendPeerMsgCallback!!
+            id, this.onCriticalErrorCallback!!, this.sendPeerMsgCallback!!
         )
     }
 }

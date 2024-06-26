@@ -10,12 +10,12 @@ import libs.core.worker.utils.JsonParser
 import java.nio.ByteBuffer
 
 class SendPeerMsgToRecruiterEvent(
-    repository: Repository, recruiterId: String, private val msg: PeerMsg
-): RecruiterEvent(repository, recruiterId) {
+    repository: Repository, recruiterId: String, private val moduleId: String, private val msg: PeerMsg
+): RecruiterEvent(SendPeerMsgToRecruiterEvent::class.simpleName.toString(), repository, recruiterId) {
 
     override fun handleImpl(recruiter: Recruiter) {
-        if(recruiter.isConnected()){
-            log(LoggerLvl.MID, "Sending peer msg to Recruiter")
+        if(recruiter.isConnected){
+            logP2POutgoingMsg(msg, recruiterId)
             sendMsg(msg, recruiter, repository.parser) // TODO check se ci è riuscito
         } else {
             log(LoggerLvl.COMPLETE, "Recruiter's peer is not connected, postponing msg")
@@ -29,7 +29,7 @@ class SendPeerMsgToRecruiterEvent(
     }
 
     private fun sendMsg(msg: PeerMsg, recruiter: Recruiter, parser: JsonParser): Boolean {
-        if(recruiter.dataChannel == null || !recruiter.isConnected()){
+        if(recruiter.dataChannel == null || !recruiter.isConnected){
             return false
         }
         try {
@@ -42,5 +42,14 @@ class SendPeerMsgToRecruiterEvent(
             return false
         }
         return true
+    }
+
+    private fun logP2POutgoingMsg(peerMsg: PeerMsg, recruiterId: String){
+        repository.logger.log(
+            LoggerLvl.MID,
+            "Forwarding outgoing msg from module $moduleId to Recruiter",
+            "Outgoing P2P msg ${peerMsg.msgType} to $recruiterId",
+            "Msg ID: ${peerMsg.msgId}"
+        )
     }
 }

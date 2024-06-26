@@ -8,7 +8,9 @@ import libs.core.worker.events.socket.messages.outgoing.OutgoingTeamApplicationM
 import libs.core.worker.events.socket.messages.data.TeamProposalMsg
 import libs.core.worker.utils.LoggerLvl
 
-class IncomingTeamProposalMsgEvent(repository: Repository, private val payload:String) : Event(repository) {
+class IncomingTeamProposalMsgEvent(
+    repository: Repository, private val payload:String
+) : Event(IncomingTeamProposalMsgEvent::class.simpleName.toString(), repository) {
 
     override fun handleImpl() {
         repository.parser.fromJson(payload, TeamProposalMsgParsable::class.java).ifPresentOrElse(
@@ -31,12 +33,13 @@ class IncomingTeamProposalMsgEvent(repository: Repository, private val payload:S
                 OutgoingTeamApplicationMsgEvent(repository, recruiterId).handle()
             }
         } else {
+            println("No module found")
             // TODO
         }
     }
 
     private fun handleErrorOnMsgStructure(cause: String){
-        repository.logger.errorSocket(SocketMsgType.TEAM_PROPOSAL_NAME, "$cause msg, discarding it:\n$payload")
+        repository.logger.errorSocketMsg(SocketMsgType.TEAM_PROPOSAL_NAME, "$cause msg, discarding it:\n$payload")
     }
 
     private fun logMidIncoming(recruiterId: String, msg: String) {

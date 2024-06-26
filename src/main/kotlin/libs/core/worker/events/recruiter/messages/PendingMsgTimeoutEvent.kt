@@ -6,12 +6,12 @@ import libs.core.worker.recruiter.Recruiter
 
 class PendingMsgTimeoutEvent(
     repository: Repository, recruiterId: String, private val msgId: String
-) : RecruiterEvent(repository, recruiterId) {
+) : RecruiterEvent(PendingMsgTimeoutEvent::class.simpleName.toString(), repository, recruiterId) {
 
     override fun handleImpl(recruiter: Recruiter) {
         recruiter.pendingMessages[msgId]?.let { pendingMsg ->
             if(pendingMsg.parts.size < pendingMsg.total){
-                repository.removeRecruiter(recruiter)
+                repository.removeRecruiter(recruiter, "Timeout reached form multipart msg with ID $msgId")
             }
         }
     }

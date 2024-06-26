@@ -7,7 +7,9 @@ import libs.core.worker.events.socket.messages.data.TeamDetailsMsg
 import libs.core.worker.events.socket.messages.data.abstractions.SocketMsgType
 import libs.core.worker.utils.LoggerLvl
 
-class IncomingTeamDetailsMsgEvent(repository: Repository, private val payload:String) : Event(repository) {
+class IncomingTeamDetailsMsgEvent(
+    repository: Repository, private val payload:String
+) : Event(IncomingTeamDetailsMsgEvent::class.simpleName.toString(), repository) {
 
     override fun handleImpl() {
         repository.parser.fromJson(payload, TeamDetailsMsgParsable::class.java).ifPresentOrElse(
@@ -22,23 +24,29 @@ class IncomingTeamDetailsMsgEvent(repository: Repository, private val payload:St
     private fun handleCheckedMsg(checkedMsg: TeamDetailsMsg) {
         val recruiter = repository.recruiters[checkedMsg.from]
         if(recruiter == null){
-            repository.logger.errorSocket(SocketMsgType.TEAM_DETAILS_NAME, "Recruiter not found", checkedMsg.from)
+            repository.logger.errorSocketMsg(SocketMsgType.TEAM_DETAILS_NAME, "Recruiter not found", checkedMsg.from)
         } else {
-            if(recruiter.isConnected()){
-                logHigh(checkedMsg.from, "Recruiter already connected, ignoring msg")
+            if(recruiter.isConnected){
+                repository.logger.logSocketIncoming(
+                    LoggerLvl.COMPLETE,
+                    SocketMsgType.TEAM_DETAILS_NAME,
+                    checkedMsg.from,
+                    "Recruiter already connected, ignoring ice candidate"
+                )
             } else {
-                logHigh(checkedMsg.from, "Adding candidate")
+                repository.logger.logSocketIncoming(
+                    LoggerLvl.HIGH,
+                    SocketMsgType.TEAM_DETAILS_NAME,
+                    checkedMsg.from,
+                    "Adding ice candidate to Recruiter"
+                )
                 recruiter.addIceCandidate(checkedMsg.candidate)
             }
         }
     }
 
     private fun handleErrorOnMsgStructure(cause: String){
-        repository.logger.errorSocket(SocketMsgType.TEAM_DETAILS_NAME, "$cause msg, discarding it:\n$payload")
-    }
-
-    private fun logHigh(from: String, msg: String){
-        repository.logger.logSocketIncoming(LoggerLvl.HIGH, SocketMsgType.TEAM_DETAILS_NAME, from, msg)
+        repository.logger.errorSocketMsg(SocketMsgType.TEAM_DETAILS_NAME, "$cause msg, discarding it:\n$payload")
     }
 
 }

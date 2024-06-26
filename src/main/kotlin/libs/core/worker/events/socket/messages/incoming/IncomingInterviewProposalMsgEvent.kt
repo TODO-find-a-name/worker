@@ -8,7 +8,9 @@ import libs.core.worker.events.socket.messages.data.InterviewProposalMsg
 import libs.core.worker.events.socket.messages.data.abstractions.SocketMsgType
 import libs.core.worker.utils.LoggerLvl
 
-class IncomingInterviewProposalMsgEvent(repository: Repository, private val payload:String) : Event(repository) {
+class IncomingInterviewProposalMsgEvent(
+    repository: Repository, private val payload:String
+) : Event(IncomingInterviewProposalMsgEvent::class.simpleName.toString(), repository) {
 
     override fun handleImpl() {
         repository.parser.fromJson(payload, InterviewProposalMsgParsable::class.java).ifPresentOrElse(
@@ -24,11 +26,12 @@ class IncomingInterviewProposalMsgEvent(repository: Repository, private val payl
         val module = repository.modules[msg.module]
         if (module == null) {
             // TODO
-            return;
+            println("module == null")
+            return
         }
         val recruiterId = msg.from
         if(repository.recruiters.contains(recruiterId)){
-            repository.logger.errorSocket(
+            repository.logger.errorSocketMsg(
                 SocketMsgType.INTERVIEW_PROPOSAL_NAME, "Already working with Recruiter, discarding msg"
             )
         } else {
@@ -37,12 +40,13 @@ class IncomingInterviewProposalMsgEvent(repository: Repository, private val payl
             )
             val recruiter = Recruiter(recruiterId, module, repository)
             repository.recruiters[recruiterId] = recruiter
+            repository.logger.log(LoggerLvl.COMPLETE, "Setting remote description", "Recruiter $recruiterId")
             recruiter.setRemoteDescription(msg.sessionDescription)
         }
     }
 
     private fun handleErrorOnMsgStructure(cause: String){
-        repository.logger.errorSocket(SocketMsgType.INTERVIEW_PROPOSAL_NAME, "$cause msg, discarding it:\n$payload")
+        repository.logger.errorSocketMsg(SocketMsgType.INTERVIEW_PROPOSAL_NAME, "$cause msg, discarding it:\n$payload")
     }
 
 }

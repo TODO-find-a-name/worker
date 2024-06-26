@@ -4,6 +4,7 @@ import libs.common.messages.PeerMsg
 import libs.common.module.WorkerModule
 
 class JsWorkerModule(
+    private val id: String,
     private val onCriticalErrorCallback: (recruiterId: String) -> Unit,
     private val sendPeerMsgCallback: (recruiterId: String, msg: PeerMsg) -> Unit
 ) : WorkerModule {
@@ -11,6 +12,10 @@ class JsWorkerModule(
     // TODO mock implementation
 
     private val counters = mutableMapOf<String, Int>()
+
+    override fun id(): String {
+        return id
+    }
 
     override fun addRecruiter(recruiterId: String) {
         if(counters.containsKey(recruiterId)) {

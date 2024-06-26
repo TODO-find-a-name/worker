@@ -13,10 +13,10 @@ import java.nio.charset.StandardCharsets
 
 class IncomingRecruiterMsgPartEvent(
     repository: Repository, recruiterId: String, private val msg: ByteBuffer
-) : RecruiterEvent(repository, recruiterId) {
+) : RecruiterEvent(IncomingRecruiterMsgPartEvent::class.simpleName.toString(), repository, recruiterId) {
 
     override fun handleImpl(recruiter: Recruiter) {
-        val decoded = decodeByteBuffer(msg)
+        val decoded = StandardCharsets.UTF_8.decode(msg).toString()
         repository.parser.fromJson(decoded, PeerMsgPartParsable::class.java).ifPresentOrElse(
             { msgPartParsed -> msgPartParsed.toChecked().ifPresentOrElse(
                 { handleCheckedMsgPart(it, recruiter) },
@@ -27,7 +27,7 @@ class IncomingRecruiterMsgPartEvent(
     }
 
     private fun handleCheckedMsgPart(peerMsgPart: PeerMsgPart, recruiter: Recruiter){
-        repository.logger.logP2PIncomingPart(LoggerLvl.HIGH, peerMsgPart, recruiterId)
+        logP2PIncomingPartialMsg(peerMsgPart)
         if(peerMsgPart.total == 1){
             redirectCompleteMsgToModule(peerMsgPart, recruiter)
         } else {
@@ -36,7 +36,7 @@ class IncomingRecruiterMsgPartEvent(
     }
 
     private fun redirectCompleteMsgToModule(msg: PeerMsg, recruiter: Recruiter) {
-        repository.logger.logP2PIncomingComplete(LoggerLvl.MID, msg, recruiterId)
+        logP2PIncomingCompleteMsg(msg, recruiter)
         recruiter.module.incomingPeerMsg(recruiterId, msg)
     }
 
@@ -47,9 +47,9 @@ class IncomingRecruiterMsgPartEvent(
             recruiter.pendingMessages[msgPart.msgId] = pendingMsg
         }
         if(pendingMsg.total != msgPart.total){
-            removeRecruiterOnError("Received msg part with discording total for msg", msgPart, recruiter)
+            removeRecruiterOnError("Received msg part with discording total", msgPart, recruiter)
         } else if(pendingMsg.parts[msgPart.part] !== null){
-            removeRecruiterOnError("Duplicate msg part for msg", msgPart, recruiter)
+            removeRecruiterOnError("Duplicate msg part", msgPart, recruiter)
         } else {
             pendingMsg.parts[msgPart.part] = msgPart
             if(pendingMsg.parts.size == pendingMsg.total){
@@ -65,17 +65,37 @@ class IncomingRecruiterMsgPartEvent(
         }
     }
 
-    private fun decodeByteBuffer(byteBuffer: ByteBuffer): String {
-        return StandardCharsets.UTF_8.decode(byteBuffer).toString()
-    }
-
     private fun removeRecruiterOnError(log: String, recruiter: Recruiter){
-        repository.logger.errorRecruiter(recruiterId, "$log, removing Recruiter")
-        repository.removeRecruiter(recruiter)
+        repository.removeRecruiter(recruiter, log)
     }
 
-    private fun removeRecruiterOnError(log: String, peerMsg: PeerMsg, recruiter: Recruiter){
-        repository.logger.errorIncomingP2PMsg(recruiterId, peerMsg, "$log, removing Recruiter")
-        repository.removeRecruiter(recruiter)
+    private fun removeRecruiterOnError(log: String, msgPart: PeerMsgPart, recruiter: Recruiter){
+        removeRecruiterOnError(log + " for msg ID " + msgPart.msgId, recruiter)
     }
+
+    private fun logP2PIncomingCompleteMsg(peerMsg: PeerMsg, recruiter: Recruiter){
+        logP2PIncomingMsg(
+            LoggerLvl.MID,
+            peerMsg,
+            "Forwarding incoming msg from Recruiter to module " + recruiter.module.id()
+        )
+    }
+
+    private fun logP2PIncomingPartialMsg(peerMsgPart: PeerMsgPart){
+        logP2PIncomingMsg(
+            LoggerLvl.COMPLETE,
+            peerMsgPart,
+            "Received p2p msg part with index " + peerMsgPart.part.toString() + " (total: " + peerMsgPart.total + ")"
+        )
+    }
+
+    private fun logP2PIncomingMsg(lvl: LoggerLvl, peerMsg: PeerMsg, log: String){
+        repository.logger.log(
+            lvl,
+            log,
+            "Incoming P2P msg ${peerMsg.msgType} from $recruiterId",
+            "Msg ID: ${peerMsg.msgId}"
+        )
+    }
+
 }

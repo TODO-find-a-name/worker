@@ -12,19 +12,30 @@ import libs.core.worker.recruiter.Recruiter
 
 class OutgoingTeamDetailsMsgEvent(
     repository: Repository, recruiterId: String, private val candidate: RTCIceCandidate
-) : RecruiterEvent(repository, recruiterId) {
+) : RecruiterEvent(OutgoingTeamDetailsMsgEvent::class.simpleName.toString(), repository, recruiterId) {
 
     override fun handleImpl(recruiter: Recruiter) {
-        if(recruiter.isConnected()){
+        if(recruiter.isConnected){
+            repository.logger.logSocketOutgoing(
+                LoggerLvl.COMPLETE,
+                SocketMsgType.TEAM_DETAILS_NAME,
+                recruiterId,
+                "Recruiter already connected, ice candidate will not be sent"
+            )
+        } else {
             repository.logger.logSocketOutgoing(LoggerLvl.HIGH, SocketMsgType.TEAM_DETAILS_NAME, recruiterId, "Sending ice candidate")
             TeamDetailsMsgParsable.send(
                 repository, recruiterId, IceCandidateAdapter.adaptConcrete(candidate)
             ){
                 repository.logger.logSocketOutgoingAck(
-                    LoggerLvl.COMPLETE, SocketMsgType.TEAM_APPLICATION_NAME, recruiterId, it
+                    LoggerLvl.COMPLETE, SocketMsgType.TEAM_DETAILS_NAME, recruiterId, it
                 )
                 if(!it){
-                    RemoveRecruiterEvent(repository, recruiterId).handle()
+                    RemoveRecruiterEvent(
+                        repository,
+                        recruiterId,
+                        "Ack is false on " + SocketMsgType.TEAM_DETAILS_NAME + " sent msg",
+                    ).handle()
                 }
             }
         }

@@ -4,13 +4,15 @@ import libs.core.worker.Repository
 import libs.core.worker.events.Event
 import libs.core.worker.utils.LoggerLvl
 
-class OnSocketConnectionErrorEvent(repository: Repository) : Event(repository) {
+class OnSocketConnectionErrorEvent(
+    repository: Repository
+) : Event(OnSocketConnectionErrorEvent::class.simpleName.toString(), repository) {
 
     override fun handleImpl() {
-        repository.logger.logRegular(LoggerLvl.LOW, "Error while connecting to Broker")
+        repository.logger.log(LoggerLvl.LOW, "Error while connecting to Broker")
         repository.isRunning = false
         repository.recruiters.keys.forEach{
-            repository.removeRecruiter(it)
+            repository.removeRecruiter(it, "Error while connecting to Broker")
         }
         repository.viewCallbacks.onBrokerConnectionError()
     }
