@@ -12,9 +12,9 @@ class Repository(
 
     val logger: Logger = Logger(settings)
     val lock: Lock = Lock(logger)
-    val modules = ModulesLoader.loadModules(modulePacks, this)
-    val socket = Socket(this)
     val parser = JsonParser()
+    val modules = ModulesLoader().loadModules(modulePacks, this)
+    val socket = Socket(this)
     val recruiters: MutableMap<String, Recruiter> = mutableMapOf()
 
     fun removeRecruiter(id: String, log: String) {

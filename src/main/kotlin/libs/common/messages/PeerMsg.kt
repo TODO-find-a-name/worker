@@ -38,6 +38,44 @@ open class PeerMsg(
     }
 }
 
+class LocalPeerMsg(
+    msgId: Int,
+    msgType: String,
+    jobId: String,
+    jobType: String,
+    payload: String,
+    val recruiterId: String
+) : PeerMsg(
+    msgId, msgType, jobId, jobType, payload
+) {
+    companion object {
+        fun createFromPeerMsg(msg: PeerMsg, recruiterId: String): LocalPeerMsg {
+            return LocalPeerMsg(msg.msgId, msg.msgType, msg.jobId, msg.jobType, msg.payload, recruiterId)
+        }
+    }
+}
+
+class LocalPeerMsgParsable {
+    @SerializedName("msgId") var msgId: Int? = null
+    @SerializedName("msgType") var msgType: String? = null
+    @SerializedName("jobId") var jobId: String? = null
+    @SerializedName("jobType") var jobType: String? = null
+    @SerializedName("payload") var payload: String? = null
+    @SerializedName("recruiterId") var recruiterId: String? = null
+
+    fun toChecked(): Optional<LocalPeerMsg> {
+        return if (isSomethingAbsent()) {
+            Optional.empty()
+        } else {
+            Optional.of(LocalPeerMsg(msgId!!, msgType!!, jobId!!, jobType!!, payload!!, recruiterId!!))
+        }
+    }
+
+    private fun isSomethingAbsent(): Boolean {
+        return msgId == null || msgType == null || jobId == null || jobType == null || payload == null || recruiterId == null
+    }
+}
+
 class PeerMsgPart(
     msgId: Int,
     msgType: String,

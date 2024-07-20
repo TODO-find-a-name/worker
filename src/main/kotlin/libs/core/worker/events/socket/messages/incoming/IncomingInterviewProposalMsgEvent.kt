@@ -1,10 +1,10 @@
 package libs.core.worker.events.socket.messages.incoming
 
 import libs.core.worker.Recruiter
-import libs.core.worker.events.socket.messages.data.InterviewProposalMsgParsable
 import libs.core.worker.Repository
 import libs.core.worker.events.Event
 import libs.core.worker.events.socket.messages.data.InterviewProposalMsg
+import libs.core.worker.events.socket.messages.data.InterviewProposalMsgParsable
 import libs.core.worker.events.socket.messages.data.abstractions.SocketMsgType
 import libs.core.worker.utils.LoggerLvl
 
@@ -25,8 +25,12 @@ class IncomingInterviewProposalMsgEvent(
     private fun handleCheckedMsg(msg: InterviewProposalMsg) {
         val module = repository.modules[msg.module]
         if (module == null) {
-            // TODO
-            println("module == null")
+            repository.logger.logSocketIncoming(
+                LoggerLvl.COMPLETE,
+                SocketMsgType.INTERVIEW_PROPOSAL_NAME,
+                msg.from,
+                "Received a request for an unavailable module ${msg.module}, ignoring"
+            )
             return
         }
         val recruiterId = msg.from

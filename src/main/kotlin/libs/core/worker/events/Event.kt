@@ -1,7 +1,7 @@
 package libs.core.worker.events
 
-import libs.core.worker.Repository
 import libs.core.worker.Recruiter
+import libs.core.worker.Repository
 
 abstract class Event(private val eventName: String, val repository: Repository) {
 
@@ -28,11 +28,5 @@ abstract class RecruiterEvent(
     }
 
     abstract fun handleImpl(recruiter: Recruiter)
-
-}
-
-abstract class NestedEvent(val repository: Repository) {
-
-    abstract fun handle()
 
 }

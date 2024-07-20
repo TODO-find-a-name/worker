@@ -1,13 +1,47 @@
 package libs.common.module
 
+import com.corundumstudio.socketio.SocketIOClient
 import libs.common.ViewCallbacks
-import libs.common.messages.PeerMsg
+import libs.core.worker.utils.JsonParser
+import libs.core.worker.utils.Logger
+import libs.core.worker.utils.WorkerSettings
 
-interface WorkerModuleBuilder {
+class WorkerModuleBuilder(private val id: String) {
 
-    fun onCriticalError(callback: (recruiterId: String) -> Unit): WorkerModuleBuilder
-    fun sendPeerMsg(callback: (recruiterId: String, msg: PeerMsg) -> Unit): WorkerModuleBuilder
-    fun viewCallbacks(viewCallbacks: ViewCallbacks): WorkerModuleBuilder
-    fun build(): WorkerModule
+    private var socketClient: SocketIOClient? = null
+    private var settings: WorkerSettings? = null
+    private var jsonParser: JsonParser? = null
+    private var logger: Logger? = null
+    private var viewCallbacks: ViewCallbacks? = null
 
+    fun socketClient(client: SocketIOClient): WorkerModuleBuilder {
+        this.socketClient = client
+        return this
+    }
+
+    fun settings(settings: WorkerSettings): WorkerModuleBuilder {
+        this.settings = settings
+        return this
+    }
+
+    fun jsonParser(parser: JsonParser): WorkerModuleBuilder {
+        this.jsonParser = parser
+        return this
+    }
+
+    fun viewCallbacks(viewCallbacks: ViewCallbacks): WorkerModuleBuilder {
+        this.viewCallbacks = viewCallbacks
+        return this
+    }
+
+    fun logger(logger: Logger): WorkerModuleBuilder {
+        this.logger = logger
+        return this
+    }
+
+    fun build(): WorkerModule {
+        return WorkerModule(
+            id, socketClient!!, jsonParser!!, logger!!, settings!!, viewCallbacks!!
+        )
+    }
 }

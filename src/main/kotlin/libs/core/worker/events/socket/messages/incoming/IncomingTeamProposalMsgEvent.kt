@@ -1,11 +1,12 @@
 package libs.core.worker.events.socket.messages.incoming
 
-import libs.core.worker.events.socket.messages.data.TeamProposalMsgParsable
-import libs.core.worker.events.socket.messages.data.abstractions.SocketMsgType
 import libs.core.worker.Repository
 import libs.core.worker.events.Event
-import libs.core.worker.events.socket.messages.outgoing.OutgoingTeamApplicationMsgEvent
+import libs.core.worker.events.RemoveRecruiterEvent
+import libs.core.worker.events.socket.messages.data.TeamApplicationMsg
 import libs.core.worker.events.socket.messages.data.TeamProposalMsg
+import libs.core.worker.events.socket.messages.data.TeamProposalMsgParsable
+import libs.core.worker.events.socket.messages.data.abstractions.SocketMsgType
 import libs.core.worker.utils.LoggerLvl
 
 class IncomingTeamProposalMsgEvent(
@@ -30,11 +31,29 @@ class IncomingTeamProposalMsgEvent(
                 logMidIncoming(recruiterId, "Already in contact with Recruiter, ignoring message")
             } else {
                 logMidIncoming(recruiterId, "New Recruiter requested Team creation")
-                OutgoingTeamApplicationMsgEvent(repository, recruiterId).handle()
+                repository.logger.logSocketOutgoing(
+                    LoggerLvl.MID, SocketMsgType.TEAM_APPLICATION_NAME, recruiterId, "Applying for team"
+                )
+                TeamApplicationMsg.send(repository, recruiterId){
+                    repository.logger.logSocketOutgoingAck(
+                        LoggerLvl.COMPLETE, SocketMsgType.TEAM_APPLICATION_NAME, recruiterId, it
+                    )
+                    if(!it){
+                        RemoveRecruiterEvent(
+                            repository,
+                            recruiterId,
+                            "Ack is false on " + SocketMsgType.TEAM_APPLICATION_NAME + " sent msg",
+                        ).handle()
+                    }
+                }
             }
         } else {
-            println("No module found")
-            // TODO
+            repository.logger.logSocketIncoming(
+                LoggerLvl.COMPLETE,
+                SocketMsgType.TEAM_PROPOSAL,
+                msg.from,
+                "Received a request for an unavailable module ${msg.module}, ignoring"
+            )
         }
     }
 

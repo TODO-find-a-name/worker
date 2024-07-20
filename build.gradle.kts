@@ -24,6 +24,7 @@ dependencies {
     implementation("io.github.cdimascio:dotenv-kotlin:6.3.1")
     implementation("dev.onvoid.webrtc:webrtc-java:0.8.0")
     implementation(getWebrtcDependency())
+    implementation("com.corundumstudio.socketio:netty-socketio:2.0.9")
 }
 
 application {

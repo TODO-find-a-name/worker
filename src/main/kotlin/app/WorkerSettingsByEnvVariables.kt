@@ -1,15 +1,28 @@
 package app
 
-import io.github.cdimascio.dotenv.dotenv
-import libs.core.worker.utils.*
-import java.util.Optional
+import app.StringEnvVariableReader.Companion.readOptionalString
+import libs.core.worker.utils.DEFAULT_LOAD_MODULES_MANUALLY
+import libs.core.worker.utils.DEFAULT_LOGGING_LEVEL
+import libs.core.worker.utils.DEFAULT_MODULE_FORWARDING_TIMEOUT_SECONDS
+import libs.core.worker.utils.DEFAULT_MODULE_LOADING_TIMEOUT_MS
+import libs.core.worker.utils.DEFAULT_NODE_MODULE_STARTUP_SCRIPT_PATH
+import libs.core.worker.utils.DEFAULT_P2P_MSG_TIMEOUT_MS
+import libs.core.worker.utils.DEFAULT_P2P_PAYLOAD_SIZE_BYTES
+import libs.core.worker.utils.DEFAULT_RECRUITMENT_TIMEOUT_MS
+import libs.core.worker.utils.LoggerLvl
+import libs.core.worker.utils.WorkerSettings
 
 const val ENV_BROKER_ADDR = "BROKER_ADDR"
 const val ENV_ORGANIZATION = "ORGANIZATION"
 const val ENV_LOGGING_LVL = "LOGGING_LVL"
-const val ENV_P2P_PAYLOAD_SIZE_BYTES = "ENV_P2P_PAYLOAD_SIZE_BYTES"
+const val ENV_MODULE_LOADING_TIMEOUT_MS = "MODULE_LOADING_TIMEOUT_MS"
+const val ENV_P2P_PAYLOAD_SIZE_BYTES = "P2P_PAYLOAD_SIZE_BYTES"
 const val ENV_RECRUITMENT_TIMEOUT_MS = "RECRUITMENT_TIMEOUT_MS"
+const val ENV_LOAD_MODULES_MANUALLY = "LOAD_MODULES_MANUALLY"
 const val ENV_P2P_MSG_TIMEOUT_MS = "P2P_MSG_TIMEOUT_MS"
+const val ENV_MODULE_FORWARDING_TIMEOUT_SECONDS = "MODULE_FORWARDING_TIMEOUT_SECONDS"
+
+const val NODE_MODULE_SCRIPT_PATH = "NODE_MODULE_SCRIPT_PATH"
 
 class WorkerSettingsByEnvVariables {
     companion object {
@@ -18,9 +31,13 @@ class WorkerSettingsByEnvVariables {
                 readMandatoryString(ENV_BROKER_ADDR),
                 readMandatoryString(ENV_ORGANIZATION),
                 getLoggingLvl(),
+                readGreaterThanZeroOrElse(ENV_MODULE_LOADING_TIMEOUT_MS, DEFAULT_MODULE_LOADING_TIMEOUT_MS),
                 readGreaterThanZeroOrElse(ENV_P2P_PAYLOAD_SIZE_BYTES, DEFAULT_P2P_PAYLOAD_SIZE_BYTES),
                 readGreaterThanZeroOrElse(ENV_RECRUITMENT_TIMEOUT_MS, DEFAULT_RECRUITMENT_TIMEOUT_MS),
-                readGreaterThanZeroOrElse(ENV_P2P_MSG_TIMEOUT_MS, DEFAULT_P2P_MSG_TIMEOUT_MS)
+                readGreaterThanZeroOrElse(ENV_P2P_MSG_TIMEOUT_MS, DEFAULT_P2P_MSG_TIMEOUT_MS),
+                readIntOrElse(ENV_MODULE_FORWARDING_TIMEOUT_SECONDS, DEFAULT_MODULE_FORWARDING_TIMEOUT_SECONDS),
+                readBooleanOrElse(ENV_LOAD_MODULES_MANUALLY, DEFAULT_LOAD_MODULES_MANUALLY),
+                readStringOrElse(NODE_MODULE_SCRIPT_PATH, DEFAULT_NODE_MODULE_STARTUP_SCRIPT_PATH)
             )
         }
 
@@ -59,26 +76,28 @@ class WorkerSettingsByEnvVariables {
             }
         }
 
-        private fun readOptionalString(varName: String): Optional<String>{
-            var res = try {
-                dotenv()[varName]
-            } catch (e: Exception){
-                try {
-                    System.getenv(varName)
-                } catch (e: Exception){
-                    return Optional.empty()
-                }
+        private fun readBooleanOrElse(varName: String, default: Boolean): Boolean{
+            val env = readOptionalString(varName)
+            if(env.isEmpty){
+                return default
             }
+            try {
+                return env.get().toBoolean()
+            } catch (e: Exception) {
+                throw IllegalStateException("Env variable $varName must be a boolean")
+            }
+        }
 
-            if(res == null){
-                return Optional.empty()
+        private fun readIntOrElse(varName: String, default: Int): Int{
+            val env = readOptionalString(varName)
+            if(env.isEmpty){
+                return default
             }
-
-            res = res.trim()
-            if(res.isEmpty()){
-                return Optional.empty()
+            try {
+                return env.get().toInt()
+            } catch (e: Exception) {
+                throw IllegalStateException("Env variable $varName must be an integer")
             }
-            return Optional.of(res)
         }
 
         private fun readMandatoryString(varName: String): String{
@@ -87,6 +106,10 @@ class WorkerSettingsByEnvVariables {
                 return tmp.get()
             }
             throw IllegalStateException("Env variable $varName not found")
+        }
+
+        private fun readStringOrElse(varName: String, default: String): String{
+            return readOptionalString(varName).orElse(default)
         }
 
     }
