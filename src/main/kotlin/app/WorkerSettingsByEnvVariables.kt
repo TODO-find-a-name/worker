@@ -1,6 +1,7 @@
 package app
 
 import app.StringEnvVariableReader.Companion.readOptionalString
+import libs.core.worker.utils.DEFAULT_IS_GUI_ENABLED
 import libs.core.worker.utils.DEFAULT_LOAD_MODULES_MANUALLY
 import libs.core.worker.utils.DEFAULT_LOGGING_LEVEL
 import libs.core.worker.utils.DEFAULT_MODULE_FORWARDING_TIMEOUT_SECONDS
@@ -15,6 +16,7 @@ import libs.core.worker.utils.WorkerSettings
 const val ENV_BROKER_ADDR = "BROKER_ADDR"
 const val ENV_ORGANIZATION = "ORGANIZATION"
 const val ENV_LOGGING_LVL = "LOGGING_LVL"
+const val ENV_IS_GUI_ENABLED = "IS_GUI_ENABLED"
 const val ENV_MODULE_LOADING_TIMEOUT_MS = "MODULE_LOADING_TIMEOUT_MS"
 const val ENV_P2P_PAYLOAD_SIZE_BYTES = "P2P_PAYLOAD_SIZE_BYTES"
 const val ENV_RECRUITMENT_TIMEOUT_MS = "RECRUITMENT_TIMEOUT_MS"
@@ -31,6 +33,7 @@ class WorkerSettingsByEnvVariables {
                 readMandatoryString(ENV_BROKER_ADDR),
                 readMandatoryString(ENV_ORGANIZATION),
                 getLoggingLvl(),
+                readBooleanOrElse(ENV_IS_GUI_ENABLED, DEFAULT_IS_GUI_ENABLED),
                 readGreaterThanZeroOrElse(ENV_MODULE_LOADING_TIMEOUT_MS, DEFAULT_MODULE_LOADING_TIMEOUT_MS),
                 readGreaterThanZeroOrElse(ENV_P2P_PAYLOAD_SIZE_BYTES, DEFAULT_P2P_PAYLOAD_SIZE_BYTES),
                 readGreaterThanZeroOrElse(ENV_RECRUITMENT_TIMEOUT_MS, DEFAULT_RECRUITMENT_TIMEOUT_MS),

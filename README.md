@@ -32,5 +32,9 @@ Just use the Gradle wrapper from the project's main directory.
 | RECRUITMENT_TIMEOUT_MS     | false     | 5000    | greater than zero integers         |
 | P2P_MSG_TIMEOUT_MS         | false     | 60000   | greater than zero integers         |
 
+
+## If you are on linux
+If you want to launch the gui and then run the podman container contacting a local broker, you need to pass the ip of the machine, not host.containers.internal (works only on macos and windows). You can get it with "ip a".
+
 ## TODOs
 Basically everything

@@ -2,6 +2,7 @@ package libs.core.worker.events.socket.status
 
 import libs.core.worker.Repository
 import libs.core.worker.events.Event
+import libs.core.worker.gui.BrokerDisconnectedGuiMsg
 import libs.core.worker.utils.LoggerLvl
 
 class OnSocketDisconnectionEvent(
@@ -14,7 +15,7 @@ class OnSocketDisconnectionEvent(
         repository.recruiters.keys.forEach{
             repository.removeRecruiter(it, "Disconnection from Broker")
         }
-        repository.viewCallbacks.onBrokerDisconnection()
+        repository.guiSocket.send(BrokerDisconnectedGuiMsg(), repository.parser)
     }
 
 }

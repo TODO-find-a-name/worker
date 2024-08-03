@@ -1,6 +1,5 @@
 package libs.core.worker.utils
 
-import com.corundumstudio.socketio.Configuration
 import com.corundumstudio.socketio.SocketIOClient
 import com.corundumstudio.socketio.SocketIOServer
 import libs.common.messages.LocalPeerMsg
@@ -11,6 +10,7 @@ import libs.common.module.WorkerModulePack
 import libs.core.worker.Repository
 import libs.core.worker.events.RemoveRecruiterEvent
 import libs.core.worker.events.recruiter.messages.SendPeerMsgToRecruiterEvent
+import libs.core.worker.gui.ModuleLoadedGuiMsg
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
@@ -21,27 +21,13 @@ class ModulesLoader {
 
     private var moduleLoaderGuard: Optional<ModuleLoaderGuard> = Optional.empty()
 
-    fun loadModules(modulePacks: List<WorkerModulePack>, repository: Repository): Map<String, WorkerModule> {
-        val server = createAndStartSocketIoServer(repository)
-        return modulePacks.associateBy({ it.id() }, { loadModule(it, repository, server) })
-    }
-
-    private fun createAndStartSocketIoServer(repository: Repository): SocketIOServer {
-        val config = Configuration()
-        config.hostname = "localhost"
-        config.port = 8081 //TODO env variable?
-
-        val server = SocketIOServer(config)
-        server.addEventListener(INIT_CHANNEL, String::class.java){ client, data, _ ->
+    fun loadModules(
+        modulePacks: List<WorkerModulePack>, socketServer: SocketIOServer, repository: Repository
+    ): Map<String, WorkerModule> {
+        socketServer.addEventListener(INIT_CHANNEL, String::class.java){ client, data, _ ->
             moduleLoaderGuard.get().complete(data, client)
         }
-        Runtime.getRuntime().addShutdownHook(Thread {
-            server.stop()
-            repository.logger.log(LoggerLvl.LOW, "Local Socket server stopped")
-        })
-        server.start()
-        repository.logger.log(LoggerLvl.LOW, "Local Socket server started")
-        return server
+        return modulePacks.associateBy({ it.id() }, { loadModule(it, repository, socketServer) })
     }
 
     private fun loadModule(pack: WorkerModulePack, repository: Repository, server: SocketIOServer): WorkerModule {
@@ -59,6 +45,7 @@ class ModulesLoader {
 
         val module = buildWorkerModule(pack, client, repository)
         repository.logger.log(LoggerLvl.LOW, "Module ${pack.id()} loaded")
+        repository.guiSocket.send(ModuleLoadedGuiMsg(pack.id()), repository.parser)
         return module
     }
 
@@ -98,6 +85,7 @@ class ModulesLoader {
     }
 
     private fun registerDisconnectionShutdownListener(pack: WorkerModulePack, repository: Repository, server: SocketIOServer){
+        // TODO secondo me non funziona come la pensavo, onDisconnect ti da un client, bisogna controllare quello
         server.addDisconnectListener{
             ExtremeSolution.shutdown(repository.logger, ShutdownCode.MODULE_DISCONNECTED, "Connection to module " + pack.id() + " lost, shutting down")
         }
@@ -117,7 +105,7 @@ class ModulesLoader {
             .settings(repository.settings)
             .jsonParser(repository.parser)
             .logger(repository.logger)
-            .viewCallbacks(repository.viewCallbacks)
+            .guiSocket(repository.guiSocket)
             .build()
     }
 

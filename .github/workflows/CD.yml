@@ -1,19 +1,35 @@
 name: CD
 on:
-  push:
-    tags:
-      - '*'
+  release:
+    types:
+      - published
 
 jobs:
+
   deploy-docker-image:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+
       - name: Set version
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Install node js module dependencies
+        run: npm install --prefix ./modules/node_js_client_module --frozen-lockfile
+
+      - name: Build node js module
+        run: npm run build --prefix ./modules/node_js_client_module
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Login to DockerHub Registry
         run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-      - name: Build the latest Docker image
-        run: docker build . --file Dockerfile --tag ${{ secrets.DOCKERHUB_USERNAME }}/worker:latest --tag ${{ secrets.DOCKERHUB_USERNAME }}/worker:${{ env.RELEASE_VERSION }}
-      - name: Push the latest Docker image
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/worker  --all-tags
+
+      - name: Build and push Docker image
+        run: |
+          docker buildx create --use
+          docker buildx build --platform linux/amd64,linux/arm64 \
+          --tag ${{ secrets.DOCKERHUB_USERNAME }}/worker:latest \
+          --tag ${{ secrets.DOCKERHUB_USERNAME }}/worker:${{ env.RELEASE_VERSION }} \
+          --push .

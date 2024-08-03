@@ -2,6 +2,7 @@ package libs.core.worker.events.socket.status
 
 import libs.core.worker.Repository
 import libs.core.worker.events.Event
+import libs.core.worker.gui.BrokerConnectionErrorGuiMsg
 import libs.core.worker.utils.LoggerLvl
 
 class OnSocketConnectionErrorEvent(
@@ -14,7 +15,8 @@ class OnSocketConnectionErrorEvent(
         repository.recruiters.keys.forEach{
             repository.removeRecruiter(it, "Error while connecting to Broker")
         }
-        repository.viewCallbacks.onBrokerConnectionError()
+
+        repository.guiSocket.send(BrokerConnectionErrorGuiMsg(), repository.parser)
     }
 
 }

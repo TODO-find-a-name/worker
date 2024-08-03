@@ -2,9 +2,11 @@ package libs.common.module
 
 import com.corundumstudio.socketio.AckCallback
 import com.corundumstudio.socketio.SocketIOClient
-import libs.common.ViewCallbacks
 import libs.common.messages.LocalPeerMsg
 import libs.common.messages.PeerMsg
+import libs.core.worker.GuiSocket
+import libs.core.worker.gui.StartJobGuiMsg
+import libs.core.worker.gui.StopJobGuiMsg
 import libs.core.worker.utils.ExtremeSolution
 import libs.core.worker.utils.JsonParser
 import libs.core.worker.utils.Logger
@@ -25,7 +27,7 @@ class WorkerModule(
     private val parser: JsonParser,
     private val logger: Logger,
     private val settings: WorkerSettings,
-    private val viewCallbacks: ViewCallbacks
+    private val guiSocket: GuiSocket
 ){
 
     fun id(): String {
@@ -40,10 +42,10 @@ class WorkerModule(
         when(msg.msgType){
             NEW_TASK_CHANNEL -> redirectMsgToClient(recruiterId, msg){ }
             NEW_JOB_CHANNEL -> redirectMsgToClient(recruiterId, msg){
-                viewCallbacks.onJobStarted(recruiterId, msg.jobId)
+                guiSocket.send(StartJobGuiMsg(recruiterId, msg.jobId), parser)
             }
             STOP_JOB_CHANNEL -> redirectMsgToClient(recruiterId, msg){
-                viewCallbacks.onJobEnded(recruiterId, msg.jobId)
+                guiSocket.send(StopJobGuiMsg(recruiterId, msg.jobId), parser)
             }
         }
     }

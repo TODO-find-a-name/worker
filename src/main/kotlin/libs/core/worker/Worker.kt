@@ -1,12 +1,11 @@
 package libs.core.worker
 
-import libs.common.ViewCallbacks
-import libs.core.worker.utils.WorkerSettings
 import libs.common.module.WorkerModulePack
+import libs.core.worker.utils.WorkerSettings
 
-class Worker(settings: WorkerSettings, modulePacks: List<WorkerModulePack>, viewCallbacks: ViewCallbacks) {
+class Worker(settings: WorkerSettings, modulePacks: List<WorkerModulePack>) {
 
-    private val repository: Repository = Repository(settings, modulePacks, viewCallbacks)
+    private val repository: Repository = Repository(settings, modulePacks)
 
     fun connect() {
         if(!repository.isRunning && !repository.socket.isConnected()){

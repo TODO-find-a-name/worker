@@ -13,6 +13,7 @@ class ExtremeSolution {
 
 enum class ShutdownCode {
     OK,
+    GUI_LOADING_TIMEOUT,
     WRONG_MODULE_LOADING_RESPONSE,
     MODULE_LOADING_TIMEOUT,
     MODULE_FORWARDING_TIMEOUT,

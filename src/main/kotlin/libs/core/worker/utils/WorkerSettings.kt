@@ -4,6 +4,7 @@ import dev.onvoid.webrtc.RTCConfiguration
 import dev.onvoid.webrtc.RTCIceServer
 
 val DEFAULT_LOGGING_LEVEL = LoggerLvl.MID
+const val DEFAULT_IS_GUI_ENABLED = false
 const val DEFAULT_MODULE_LOADING_TIMEOUT_MS = 300000L // 5 minutes
 const val DEFAULT_P2P_PAYLOAD_SIZE_BYTES = 20000
 const val DEFAULT_RECRUITMENT_TIMEOUT_MS = 5000L
@@ -16,6 +17,7 @@ class WorkerSettings(
     val brokerAddr: String,
     val organization: String,
     val loggingLvl: LoggerLvl = DEFAULT_LOGGING_LEVEL,
+    val isGuiEnabled: Boolean = DEFAULT_IS_GUI_ENABLED,
     val moduleLoadingTimeoutMs: Long = DEFAULT_MODULE_LOADING_TIMEOUT_MS,
     val p2pPayloadSizeBytes: Int = DEFAULT_P2P_PAYLOAD_SIZE_BYTES,
     val recruitmentTimeoutMs: Long = DEFAULT_RECRUITMENT_TIMEOUT_MS,
