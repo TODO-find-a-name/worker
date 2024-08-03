@@ -49,7 +49,7 @@ tasks {
 fun getWebrtcDependency(): String {
     val osArch = System.getProperty("os.arch")
     if(Os.isFamily(Os.FAMILY_MAC)){
-        if(osArch == "x86_64"){
+        if(osArch == "x86_64" || osArch == "amd64"){
             return "dev.onvoid.webrtc:webrtc-java:0.8.0:macos-x86_64"
         } else if(osArch == "aarch64"){
             return "dev.onvoid.webrtc:webrtc-java:0.8.0:macos-aarch64"
@@ -57,13 +57,13 @@ fun getWebrtcDependency(): String {
             throw Error("Error, unsupported MacOS arch: $osArch")
         }
     } else if(Os.isFamily(Os.FAMILY_WINDOWS)){
-        if(osArch == "x86_64"){
+        if(osArch == "x86_64" || osArch == "amd64"){
             return "dev.onvoid.webrtc:webrtc-java:0.8.0:windows-x86_64"
         } else {
             throw Error("Error, unsupported Windows arch: $osArch")
         }
     } else if(Os.isFamily(Os.FAMILY_UNIX)){
-        if(osArch == "x86_64"){
+        if(osArch == "x86_64" || osArch == "amd64"){
             return "dev.onvoid.webrtc:webrtc-java:0.8.0:linux-x86_64"
         } else if(osArch == "aarch64"){
             return "dev.onvoid.webrtc:webrtc-java:0.8.0:linux-aarch64"
