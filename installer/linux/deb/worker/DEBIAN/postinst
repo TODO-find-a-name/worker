@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+
+# Abilita e avvia il servizio worker
+systemctl enable worker.service
+systemctl start worker.service
