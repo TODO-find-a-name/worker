@@ -52,30 +52,18 @@
         "deb",
         "rpm"
       ],
-      "category": "Utility",
-      "arch": [
-        "x64",
-        "arm64"
-      ]
+      "category": "Utility"
     },
     "win": {
       "target": [
         "nsis",
         "zip"
-      ],
-      "arch": [
-        "x64",
-        "ia32"
       ]
     },
     "mac": {
       "target": [
         "dmg",
         "zip"
-      ],
-      "arch": [
-        "x64",
-        "arm64"
       ]
     }
   }
