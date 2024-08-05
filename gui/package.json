@@ -52,19 +52,21 @@
         "deb",
         "rpm"
       ],
-      "category": "Utility"
+      "artifactName": "Worker-${arch}.${ext}"
     },
     "win": {
       "target": [
         "nsis",
         "zip"
-      ]
+      ],
+      "artifactName": "Worker-${arch}.${ext}"
     },
     "mac": {
       "target": [
         "dmg",
         "zip"
-      ]
+      ],
+      "artifactName": "Worker-${arch}.${ext}"
     }
   }
 }
