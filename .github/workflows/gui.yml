@@ -28,7 +28,7 @@ jobs:
       - name: Create Linux distribution
         run: |
           cd gui
-          npm run dist -- --linux
+          npm run dist
 
       - name: List Linux release directory contents
         run: |
@@ -59,7 +59,7 @@ jobs:
       - name: Create Windows distribution
         run: |
           cd gui
-          npm run dist -- --win
+          npm run dist
 
       - name: List Windows release directory contents
         run: |
@@ -90,7 +90,7 @@ jobs:
       - name: Create macOS distribution
         run: |
           cd gui
-          npm run dist -- --mac
+          npm run dist
 
       - name: List macOS release directory contents
         run: |
