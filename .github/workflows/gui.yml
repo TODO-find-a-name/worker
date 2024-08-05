@@ -28,7 +28,7 @@ jobs:
       - name: Create Linux distribution
         run: |
           cd gui
-          npm run dist
+          npm run dist -- --x64 --arm64
 
       - name: List Linux release directory contents
         run: |
@@ -90,7 +90,7 @@ jobs:
       - name: Create macOS distribution
         run: |
           cd gui
-          npm run dist
+          npm run dist -- --x64 --arm64
 
       - name: List macOS release directory contents
         run: |
