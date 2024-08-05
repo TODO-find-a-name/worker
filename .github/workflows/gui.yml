@@ -1,0 +1,37 @@
+name: Installers creation
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          cd gui
+          npm install --frozen-lockfile
+
+      - name: Build project
+        run: |
+          cd gui
+          npm run build
+
+      - name: Create distribution
+        run: |
+          cd gui
+          npm run dist
+
+      - name: List release directory contents
+        run: |
+          cd gui/release
+          ls -l
