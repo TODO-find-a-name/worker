@@ -14,11 +14,21 @@ function createWindow() {
         }
     });
 
-    mainWindow.loadURL('http://localhost:9000');
+    mainWindow.loadURL(getUrl());
 
     mainWindow.on('closed', function () {
         mainWindow = null;
     });
+}
+
+function getUrl(){
+    if(process.env.NODE_ENV === 'development'){
+        return 'http://localhost:9000';
+    } else {
+        // TODO this works on macos, check windows/linux
+        //https://www.electron.build/configuration/contents.html#extrafiles
+        return `file://${path.join(__dirname, '../../dist/index.html')}`;
+    }
 }
 
 function createTray() {

@@ -5,11 +5,12 @@
   "scripts": {
     "start": "webpack serve --open",
     "build": "webpack",
-    "electron": "electron .",
+    "electron": "NODE_ENV=development electron .",
     "dist": "electron-builder"
   },
   "keywords": [],
-  "author": "",
+  "author": "Alessandro Talmi <alessandro.talmi@gmail.com>",
+  "homepage": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
@@ -31,8 +32,8 @@
     "webpack-dev-server": "^5.0.4"
   },
   "build": {
-    "appId": "com.example.gui",
-    "productName": "GuiApp",
+    "appId": "com.example.todo",
+    "productName": "Worker",
     "files": [
       "dist/**/*",
       "icon.png",
@@ -42,6 +43,9 @@
       "buildResources": "assets",
       "output": "release"
     },
+    "extraFiles": [
+      "dist"
+    ],
     "linux": {
       "target": [
         "AppImage",
