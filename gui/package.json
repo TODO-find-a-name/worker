@@ -52,21 +52,21 @@
         "deb",
         "rpm"
       ],
-      "artifactName": "Worker-${arch}.${ext}"
+      "artifactName": "WorkerGui-${arch}.${ext}"
     },
     "win": {
       "target": [
         "nsis",
         "zip"
       ],
-      "artifactName": "Worker-${arch}.${ext}"
+      "artifactName": "WorkerGui-${arch}.${ext}"
     },
     "mac": {
       "target": [
         "dmg",
         "zip"
       ],
-      "artifactName": "Worker-${arch}.${ext}"
+      "artifactName": "WorkerGui-${arch}.${ext}"
     }
   }
 }
