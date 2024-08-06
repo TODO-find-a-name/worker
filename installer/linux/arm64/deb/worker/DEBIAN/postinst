@@ -1,0 +1,21 @@
+#!/bin/bash
+set -e
+
+command_exists() {
+    command -v "$1" &> /dev/null
+}
+
+#if ! command_exists podman; then
+    #echo "Installing podman..."
+
+    #sudo apt-get update
+    #sudo apt-get install -y podman
+#fi
+
+IMAGE_NAME="docker.io/alessandrotalmi/worker:latest"
+
+echo "Retrieving latest docker image..."
+podman pull $IMAGE_NAME
+
+echo "Installing GUI..."
+dpkg -i WorkerGui-arm64.deb

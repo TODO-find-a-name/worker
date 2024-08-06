@@ -1,6 +1,0 @@
-#!/bin/bash
-set -e
-
-# Ferma e disabilita il servizio worker
-systemctl stop worker.service
-systemctl disable worker.service

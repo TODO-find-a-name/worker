@@ -2,7 +2,7 @@ Package: worker
 Version: 1.0
 Section: base
 Priority: optional
-Architecture: all
+Architecture: arm64
 Depends: bash, systemd
 Maintainer: Alessandro Talmi alessandro.talmi@gmail.com
 Description: TODO Una breve descrizione della tua applicazione
