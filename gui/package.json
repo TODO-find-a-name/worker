@@ -86,11 +86,14 @@
             "options": {
               "name": "todo.package",
               "productName": "Worker2",
-              "maintainer": "Il tuo nome <tuoemail@example.com>",
+              "maintainer": "Alessandro Talmi <alessandro.talmi@gmail.com>",
               "homepage": "https://il-tuo-sito-web.com",
               "description" : "TODO a description",
               "version": "0.1.0",
-              "depends": ["podman"]
+              "depends": ["podman"],
+              "scripts": {
+                "postinst": "scripts/deb/postinst.sh"
+              }
             }
           }
         }
