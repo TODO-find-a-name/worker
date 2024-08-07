@@ -50,12 +50,6 @@
       "target": [
         "deb"
       ],
-      "depends": [
-        "podman"
-      ],
-      "scripts": {
-        "after-install": "./deb-after-install.sh"
-      },
       "artifactName": "WorkerGui-${arch}.${ext}"
     },
     "win": {
