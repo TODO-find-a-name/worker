@@ -53,7 +53,7 @@ jobs:
       - name: Create Linux distribution
         run: |
           cd gui
-          npx electron-forge make
+          npm run make --arch=arm64
 
       - name: ls
         run: ls gui/out/make/deb
