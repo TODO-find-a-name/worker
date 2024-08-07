@@ -24,8 +24,6 @@ function createWindow() {
         mainWindow = null;
     });
 
-    // Esegui il comando per aggiornare i pacchetti
-    console.log("pull")
     exec('podman pull ' + IMAGE_NAME, (error, stdout, stderr) => {
         if (error) {
             console.log(error.message)
@@ -53,9 +51,8 @@ function getUrl(){
     if(process.env.NODE_ENV === 'development'){
         return 'http://localhost:9000';
     } else {
-        // TODO this works on macos, check windows/linux
-        //https://www.electron.build/configuration/contents.html#extrafiles
-        return `file://${path.join(__dirname, '../../dist/index.html')}`;
+        // TODO this works on linux, check windows/macOs
+        return `file://${path.join(__dirname, '../index.html')}`;
     }
 }
 

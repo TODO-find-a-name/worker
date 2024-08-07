@@ -50,6 +50,11 @@ jobs:
           cd gui
           npm install --frozen-lockfile
 
+      - name: Build React Gui
+        run: |
+          cd gui
+          npm run build
+        
       - name: Create arm64 Linux distribution
         run: |
           cd gui
@@ -74,78 +79,78 @@ jobs:
             Worker_x64.deb
   
 
-  build-windows:
+  #build-windows:
     #needs: deploy-docker-image
-    runs-on: windows-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    #runs-on: windows-latest
+    #steps:
+     # - name: Checkout repository
+      #  uses: actions/checkout@v2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
+      #- name: Setup Node.js
+       # uses: actions/setup-node@v3
+        #with:
+         # node-version: '20'
 
-      - name: Install dependencies
-        run: |
-          cd gui
-          npm install --frozen-lockfile
+      #- name: Install dependencies
+       # run: |
+       #   cd gui
+       #   npm install --frozen-lockfile
 
-      - name: Build project
-        run: |
-          cd gui
-          npm run build
+     # - name: Build project
+     #   run: |
+     #     cd gui
+     #     npm run build
 
-      - name: Create Windows distribution
-        run: |
-          cd gui
-          npm run dist
+     # - name: Create Windows distribution
+     #   run: |
+     #     cd gui
+     #     npm run dist
 
-      - name: Move x64
-        run: mv gui/release/WorkerGui-x64.exe WorkerGui-x64.exe
+     # - name: Move x64
+     #   run: mv gui/release/WorkerGui-x64.exe WorkerGui-x64.exe
 
-      - name: Attach files to release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            WorkerGui-x64.exe
+     # - name: Attach files to release
+     #   uses: softprops/action-gh-release@v1
+     #   with:
+     #     files: |
+     #       WorkerGui-x64.exe
 
-  build-macos:
+  #build-macos:
     #needs: deploy-docker-image
-    runs-on: macos-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    #runs-on: macos-latest
+    #steps:
+    #  - name: Checkout repository
+    #    uses: actions/checkout@v2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
+    #  - name: Setup Node.js
+    #    uses: actions/setup-node@v3
+    #    with:
+    #      node-version: '20'
 
-      - name: Install dependencies
-        run: |
-          cd gui
-          npm install --frozen-lockfile
+    #  - name: Install dependencies
+    #    run: |
+    #      cd gui
+    #      npm install --frozen-lockfile
 
-      - name: Build project
-        run: |
-          cd gui
-          npm run build
+    #  - name: Build project
+    #    run: |
+    #      cd gui
+    #      npm run build
 
-      - name: Create macOS distribution
-        run: |
-          cd gui
-          npm run dist -- --x64 --arm64
+    #  - name: Create macOS distribution
+    #    run: |
+    #      cd gui
+    #      npm run dist -- --x64 --arm64
 
-      - name: Move x64
-        run: mv gui/release/WorkerGui-x64.dmg WorkerGui-x64.dmg
+    #  - name: Move x64
+    #    run: mv gui/release/WorkerGui-x64.dmg WorkerGui-x64.dmg
 
-      - name: Move arm64
-        run: mv gui/release/WorkerGui-arm64.dmg WorkerGui-arm64.dmg
+    #  - name: Move arm64
+    #    run: mv gui/release/WorkerGui-arm64.dmg WorkerGui-arm64.dmg
 
-      - name: Attach files to release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            WorkerGui-x64.dmg
-            WorkerGui-arm64.dmg
+    #  - name: Attach files to release
+    #    uses: softprops/action-gh-release@v1
+    #    with:
+    #      files: |
+    #        WorkerGui-x64.dmg
+    #        WorkerGui-arm64.dmg

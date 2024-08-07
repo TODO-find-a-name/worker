@@ -79,6 +79,12 @@
   },
   "config": {
     "forge": {
+      "packagerConfig": {
+        "extraResource": [
+          "dist/bundle.js",
+          "dist/index.html"
+        ]
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-deb",
