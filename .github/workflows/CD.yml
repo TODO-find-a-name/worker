@@ -56,7 +56,7 @@ jobs:
           npm run make -- --arch=arm64
 
       - name: ls
-        run: ls gui/out/make/deb
+        run: ls gui/out/make/deb/arm64
   
 
   build-windows:
