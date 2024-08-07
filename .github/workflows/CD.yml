@@ -58,20 +58,20 @@ jobs:
       - name: Move and rename arm64 deb file
         run: mv gui/out/make/deb/arm64/*.deb Worker_arm64.deb
 
-      - name: Create x86 Linux distribution
+      - name: Create x64 Linux distribution
         run: |
           cd gui
-          npm run make -- --arch=x86
+          npm run make -- --arch=x64
 
-      - name: Move and rename arm64 deb file
-        run: mv gui/out/make/deb/x86/*.deb Worker_x86.deb
+      - name: Move and rename x64 deb file
+        run: mv gui/out/make/deb/x64/*.deb Worker_x64.deb
 
       - name: Attach files to release
         uses: softprops/action-gh-release@v1
         with:
           files: |
             Worker_arm64.deb
-            Worker_x86.deb
+            Worker_x64.deb
   
 
   build-windows:
