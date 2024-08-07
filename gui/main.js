@@ -1,8 +1,12 @@
-const { app, BrowserWindow, Tray, Menu } = require('electron');
+const { app, BrowserWindow, Tray, Menu, dialog } = require('electron');
 const path = require('path');
+const { exec } = require('child_process');
 
 let tray = null;
 let mainWindow = null;
+
+const IMAGE_NAME = "docker.io/alessandrotalmi/worker:latest";
+const CONTAINER_NAME = "worker";
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -21,27 +25,25 @@ function createWindow() {
     });
 
     // Esegui il comando per aggiornare i pacchetti
-    exec('sudo apt update', (error, stdout, stderr) => {
+    console.log("pull")
+    exec('podman pull ' + IMAGE_NAME, (error, stdout, stderr) => {
         if (error) {
-            console.error(`Errore nell'aggiornamento dei pacchetti: ${error.message}`);
-            dialog.showErrorBox('Errore', `Errore nell'aggiornamento dei pacchetti: ${error.message}`);
+            console.log(error.message)
+            dialog.showErrorBox('Errore', `Errore download immagine: ${error.message}`);
             return;
         }
 
-        console.log(`Output aggiornamento pacchetti:\n${stdout}`);
+        console.log(`Output download immagine:\n${stdout}`);
 
-        // Esegui il comando per installare Podman
-        exec('sudo apt install podman -y', (error, stdout, stderr) => {
+        exec('podman run --rm --name ' + CONTAINER_NAME + " " + IMAGE_NAME, (error, stdout, stderr) => {
             if (error) {
-                console.error(`Errore nell'installazione di Podman: ${error.message}`);
-                dialog.showErrorBox('Errore', `Errore nell'installazione di Podman: ${error.message}`);
+                dialog.showErrorBox('Errore', `Errore avvio container: ${error.message}`);
                 return;
             }
 
-            console.log(`Output installazione Podman:\n${stdout}`);
             dialog.showMessageBox({
                 type: 'info',
-                message: 'Podman è stato installato con successo!',
+                message: 'Container avviato con successo!\n${stdout}',
             });
         });
     });
