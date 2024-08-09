@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "start": "electron-forge start",
+    "start": "webpack serve --open",
     "build": "webpack",
     "electron": "NODE_ENV=development electron .",
     "dist": "electron-builder",
@@ -82,7 +82,8 @@
       "packagerConfig": {
         "extraResource": [
           "dist/bundle.js",
-          "dist/index.html"
+          "dist/index.html",
+          "scripts"
         ]
       },
       "makers": [
@@ -96,10 +97,7 @@
               "homepage": "https://il-tuo-sito-web.com",
               "description" : "TODO a description",
               "version": "0.1.0",
-              "depends": ["podman"],
-              "scripts": {
-                "postinst": "scripts/deb/postinst.sh"
-              }
+              "depends": ["podman"]
             }
           }
         }

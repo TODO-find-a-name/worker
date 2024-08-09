@@ -1,12 +1,10 @@
 const { app, BrowserWindow, Tray, Menu, dialog } = require('electron');
 const path = require('path');
-const { exec } = require('child_process');
+const { stopContainer, startContainer } = require('./container');
+const { isDevelopment } = require("./utils");
 
 let tray = null;
 let mainWindow = null;
-
-const IMAGE_NAME = "docker.io/alessandrotalmi/worker:latest";
-const CONTAINER_NAME = "worker";
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -24,31 +22,11 @@ function createWindow() {
         mainWindow = null;
     });
 
-    exec('podman pull ' + IMAGE_NAME, (error, stdout, stderr) => {
-        if (error) {
-            console.log(error.message)
-            dialog.showErrorBox('Errore', `Errore download immagine: ${error.message}`);
-            return;
-        }
-
-        console.log(`Output download immagine:\n${stdout}`);
-
-        exec('podman run --rm --name ' + CONTAINER_NAME + " " + IMAGE_NAME, (error, stdout, stderr) => {
-            if (error) {
-                dialog.showErrorBox('Errore', `Errore avvio container: ${error.message}`);
-                return;
-            }
-
-            dialog.showMessageBox({
-                type: 'info',
-                message: 'Container avviato con successo!\n${stdout}',
-            });
-        });
-    });
+    startContainer("http://localhost:8080", "fatate");
 }
 
 function getUrl(){
-    if(process.env.NODE_ENV === 'development'){
+    if(isDevelopment()){
         return 'http://localhost:9000';
     } else {
         // TODO this works on linux, check windows/macOs
@@ -87,6 +65,7 @@ app.on('ready', () => {
 });
 
 app.on('window-all-closed', () => {
+    stopContainer();
     if (process.platform !== 'darwin') {
         app.quit();
     }
