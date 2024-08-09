@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, Menu, dialog } = require('electron');
+const { app, BrowserWindow, Tray, Menu, dialog, ipcMain } = require('electron');
 const path = require('path');
 const { stopContainer, startContainer } = require('./container');
 const { isDevelopment } = require("./utils");
@@ -8,13 +8,15 @@ let mainWindow = null;
 
 function createWindow() {
     mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 600,
+        height: 300,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
-        }
+        },
+        resizable: false
     });
+    Menu.setApplicationMenu(null);
 
     mainWindow.loadURL(getUrl());
 
@@ -22,7 +24,17 @@ function createWindow() {
         mainWindow = null;
     });
 
-    startContainer("http://localhost:8080", "fatate");
+    ipcMain.on('Start', async (event, data) => {
+        startContainer(data[1], data[0], data[2]).then(
+            () => {
+                dialog.showMessageBox({type: 'info', message: `Container avviato con successo!`});
+            },
+            (err) => {
+                dialog.showErrorBox('Errore', `Errore avvio container: ${err}`);
+            }
+        )
+    });
+
 }
 
 function getUrl(){

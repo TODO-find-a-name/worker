@@ -17,6 +17,7 @@
   "description": "",
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1",
+    "fs": "^0.0.1-security",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -95,9 +96,11 @@
               "productName": "Worker2",
               "maintainer": "Alessandro Talmi <alessandro.talmi@gmail.com>",
               "homepage": "https://il-tuo-sito-web.com",
-              "description" : "TODO a description",
+              "description": "TODO a description",
               "version": "0.1.0",
-              "depends": ["podman"]
+              "depends": [
+                "podman"
+              ]
             }
           }
         }

@@ -1,4 +1,3 @@
-const { dialog } = require('electron');
 const path = require('path');
 const { exec } = require('child_process');
 
@@ -18,21 +17,28 @@ function getStopContainerScriptPath(){
     )
 }
 
-function startContainer(addr, organization){    
-    exec(buildCliCommand(getStartContainerScriptPath(), [addr, organization]), (error) => {
-        if (error) {
-            dialog.showErrorBox('Errore', `Errore avvio container: ${error.message}`);
-        } else {
-            dialog.showMessageBox({
-                type: 'info',
-                message: `Container avviato con successo!`,
-            });
-        }
+function startContainer(addr, organization, isLocalhost){
+    return new Promise((resolve, reject) => {
+        exec(buildCliCommand(getStartContainerScriptPath(), [addr, organization, isLocalhost]), (error) => {
+            if (error) {
+                reject(error.message)
+            } else {
+                resolve()
+            }
+        });
     });
 }
 
 function stopContainer(){
-    exec(buildCliCommand(getStopContainerScriptPath()));
+    return new Promise((resolve, reject) => {
+        exec(buildCliCommand(getStopContainerScriptPath()), (error) => {
+            if (error) {
+                reject(error.message)
+            } else {
+                resolve()
+            }
+        });
+    });
 }
 
 module.exports = {startContainer, stopContainer}
