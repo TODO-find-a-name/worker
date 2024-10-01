@@ -42,7 +42,7 @@ class IncomingInterviewProposalMsgEvent(
             repository.logger.logSocketIncoming(
                 LoggerLvl.MID, SocketMsgType.INTERVIEW_PROPOSAL_NAME, recruiterId, "Creating new Recruiter"
             )
-            val recruiter = Recruiter(recruiterId, module, repository)
+            val recruiter = Recruiter(recruiterId, msg.sessionToken, module, repository)
             repository.recruiters[recruiterId] = recruiter
             repository.logger.log(LoggerLvl.COMPLETE, "Setting remote description", "Recruiter $recruiterId")
             recruiter.setRemoteDescription(msg.sessionDescription)

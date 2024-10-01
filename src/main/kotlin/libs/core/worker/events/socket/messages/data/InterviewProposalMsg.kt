@@ -1,11 +1,12 @@
 package libs.core.worker.events.socket.messages.data
 
 import com.google.gson.annotations.SerializedName
-import libs.core.worker.events.socket.messages.data.abstractions.SessionDescriptionMsg
 import dev.onvoid.webrtc.RTCSessionDescription
+import libs.core.worker.events.socket.messages.data.abstractions.SessionDescriptionMsg
 import java.util.*
 
 data class InterviewProposalMsg(
+    val sessionToken: String,
     val from: String,
     val to: String,
     val module: String,
@@ -17,14 +18,14 @@ class InterviewProposalMsgParsable(
 ): SessionDescriptionMsg(){
 
     fun toChecked(): Optional<InterviewProposalMsg> {
-        if(from == null || to == null || sessionDescription == null || module == null) {
+        if(sessionToken == null || from == null || to == null || sessionDescription == null || module == null) {
             return Optional.empty()
         }
         val rtcSessionDescription = sessionDescription!!.toConcrete()
         if(rtcSessionDescription.isEmpty){
             return Optional.empty()
         }
-        return Optional.of(InterviewProposalMsg(from!!, to!!, module!!, rtcSessionDescription.get()))
+        return Optional.of(InterviewProposalMsg(sessionToken!!, from!!, to!!, module!!, rtcSessionDescription.get()))
     }
 
 }

@@ -26,7 +26,8 @@ Just use the Gradle wrapper from the project's main directory.
 | Name                       | Mandatory | Default | Accepted values                    |
 |----------------------------|-----------|---------|------------------------------------|
 | BROKER_ADDR                | true      | /       | a non-empty valid address          |
-| ORGANIZATION               | true      | /       | a non-empty organization name      |
+| WORKER_ID                  | true      | /       | the db worker's id                 |
+| KEY                        | true      | /       | the worker's encrypted key         |
 | LOGGING_LVL                | false     | MID     | DISABLED, LOW, MID, HIGH, COMPLETE |
 | ENV_P2P_PAYLOAD_SIZE_BYTES | false     | 20000   | greater than zero integers         |
 | RECRUITMENT_TIMEOUT_MS     | false     | 5000    | greater than zero integers         |

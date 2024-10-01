@@ -4,13 +4,14 @@ import io.socket.client.Ack
 import io.socket.client.IO
 import io.socket.engineio.client.transports.WebSocket
 import libs.core.worker.events.Event
+import libs.core.worker.events.socket.messages.data.abstractions.SocketMsgType
 import libs.core.worker.events.socket.messages.incoming.IncomingInterviewProposalMsgEvent
 import libs.core.worker.events.socket.messages.incoming.IncomingTeamDetailsMsgEvent
 import libs.core.worker.events.socket.messages.incoming.IncomingTeamProposalMsgEvent
+import libs.core.worker.events.socket.status.OnSocketAuthenticatedEvent
 import libs.core.worker.events.socket.status.OnSocketConnectionErrorEvent
 import libs.core.worker.events.socket.status.OnSocketConnectionEvent
 import libs.core.worker.events.socket.status.OnSocketDisconnectionEvent
-import libs.core.worker.events.socket.messages.data.abstractions.SocketMsgType
 import libs.core.worker.utils.LoggerLvl
 import java.net.URI
 import io.socket.client.Socket as SocketIo
@@ -54,7 +55,7 @@ private fun createSocketIO(repository: Repository): SocketIo {
         URI.create(repository.settings.brokerAddr),
         IO.Options.builder()
             .setTransports(arrayOf(WebSocket.NAME))
-            .setQuery("role=" + WORKER_ROLE + "&organization=" + repository.settings.organization)
+            .setQuery("role=" + WORKER_ROLE + "&id=" + repository.settings.workerId + "&key=" + repository.settings.key)
             .build()
     )
     registerEventListeners(socket, repository)
@@ -64,8 +65,11 @@ private fun createSocketIO(repository: Repository): SocketIo {
 
 private fun registerEventListeners(socket: SocketIo, repository: Repository){
     socket.on(SocketIo.EVENT_CONNECT) {
-        repository.isRunning = true
         OnSocketConnectionEvent(repository, socket).handle()
+    }
+    socket.on("A") {
+        repository.isRunning = true
+        OnSocketAuthenticatedEvent(repository).handle()
     }
     socket.on(SocketIo.EVENT_CONNECT_ERROR) {
         OnSocketConnectionErrorEvent(repository).handle()

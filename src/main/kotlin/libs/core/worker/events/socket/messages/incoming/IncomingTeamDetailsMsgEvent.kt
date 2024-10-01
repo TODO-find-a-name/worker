@@ -1,9 +1,10 @@
 package libs.core.worker.events.socket.messages.incoming
 
-import libs.core.worker.events.socket.messages.data.TeamDetailsMsgParsable
 import libs.core.worker.Repository
 import libs.core.worker.events.Event
+import libs.core.worker.events.RemoveRecruiterEvent
 import libs.core.worker.events.socket.messages.data.TeamDetailsMsg
+import libs.core.worker.events.socket.messages.data.TeamDetailsMsgParsable
 import libs.core.worker.events.socket.messages.data.abstractions.SocketMsgType
 import libs.core.worker.utils.LoggerLvl
 
@@ -26,7 +27,13 @@ class IncomingTeamDetailsMsgEvent(
         if(recruiter == null){
             repository.logger.errorSocketMsg(SocketMsgType.TEAM_DETAILS_NAME, "Recruiter not found", checkedMsg.from)
         } else {
-            if(recruiter.isConnected){
+            if(recruiter.sessionToken != checkedMsg.sessionToken){
+                RemoveRecruiterEvent(
+                    repository,
+                    checkedMsg.from,
+                    "Session token mismatch on " + SocketMsgType.TEAM_DETAILS_NAME + " msg"
+                ).handle()
+            } else if(recruiter.isConnected){
                 repository.logger.logSocketIncoming(
                     LoggerLvl.COMPLETE,
                     SocketMsgType.TEAM_DETAILS_NAME,

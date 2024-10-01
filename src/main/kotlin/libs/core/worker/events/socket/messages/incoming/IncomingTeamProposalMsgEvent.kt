@@ -34,7 +34,7 @@ class IncomingTeamProposalMsgEvent(
                 repository.logger.logSocketOutgoing(
                     LoggerLvl.MID, SocketMsgType.TEAM_APPLICATION_NAME, recruiterId, "Applying for team"
                 )
-                TeamApplicationMsg.send(repository, recruiterId){
+                TeamApplicationMsg.send(repository, msg.sessionToken, recruiterId){
                     repository.logger.logSocketOutgoingAck(
                         LoggerLvl.COMPLETE, SocketMsgType.TEAM_APPLICATION_NAME, recruiterId, it
                     )

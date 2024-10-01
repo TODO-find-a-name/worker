@@ -15,7 +15,8 @@ const val DEFAULT_NODE_MODULE_STARTUP_SCRIPT_PATH = "./modules/node_js_client_mo
 
 class WorkerSettings(
     val brokerAddr: String,
-    val organization: String,
+    val workerId: String,
+    val key: String,
     val loggingLvl: LoggerLvl = DEFAULT_LOGGING_LEVEL,
     val isGuiEnabled: Boolean = DEFAULT_IS_GUI_ENABLED,
     val moduleLoadingTimeoutMs: Long = DEFAULT_MODULE_LOADING_TIMEOUT_MS,

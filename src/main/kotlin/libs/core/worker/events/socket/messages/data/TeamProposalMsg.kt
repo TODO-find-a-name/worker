@@ -1,9 +1,10 @@
 package libs.core.worker.events.socket.messages.data
 
 import com.google.gson.annotations.SerializedName
-import java.util.Optional
+import java.util.*
 
 data class TeamProposalMsg(
+    val sessionToken: String,
     val organization : String,
     val ignore: ArrayList<String>,
     val from: String,
@@ -11,15 +12,16 @@ data class TeamProposalMsg(
 )
 
 class TeamProposalMsgParsable(
+    @SerializedName("sessionToken") var sessionToken: String? = null,
     @SerializedName("organization") var organization : String? = null,
     @SerializedName("ignore") var ignore: ArrayList<String> = arrayListOf(),
     @SerializedName("from") var from: String? = null,
     @SerializedName("module") var module: String? = null
 ) {
     fun toChecked(): Optional<TeamProposalMsg>{
-        if(organization == null || from == null || module == null){
+        if(sessionToken == null || organization == null || from == null || module == null){
             return Optional.empty()
         }
-        return Optional.of(TeamProposalMsg(organization!!, ignore, from!!, module!!))
+        return Optional.of(TeamProposalMsg(sessionToken!!, organization!!, ignore, from!!, module!!))
     }
 }

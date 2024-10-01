@@ -1,17 +1,20 @@
 package libs.core.worker.events.socket.messages.outgoing
 
+import dev.onvoid.webrtc.RTCSessionDescription
+import libs.core.worker.Recruiter
 import libs.core.worker.Repository
+import libs.core.worker.events.RecruiterEvent
+import libs.core.worker.events.RemoveRecruiterEvent
 import libs.core.worker.events.socket.messages.data.InterviewAcceptanceMsg
 import libs.core.worker.events.socket.messages.data.abstractions.SocketMsgType
 import libs.core.worker.events.socket.messages.data.adapters.AgnosticRTCSessionDescription
 import libs.core.worker.utils.LoggerLvl
-import dev.onvoid.webrtc.RTCSessionDescription
-import libs.core.worker.events.RecruiterEvent
-import libs.core.worker.events.RemoveRecruiterEvent
-import libs.core.worker.Recruiter
 
 class OutgoingInterviewAcceptanceMsgEvent(
-    repository: Repository, recruiterId: String, private val sessionDescription: RTCSessionDescription
+    repository: Repository,
+    recruiterId: String,
+    private val sessionToken: String,
+    private val sessionDescription: RTCSessionDescription
 ) : RecruiterEvent(OutgoingInterviewAcceptanceMsgEvent::class.simpleName.toString(), repository, recruiterId) {
 
     override fun handleImpl(recruiter: Recruiter) {
@@ -22,7 +25,7 @@ class OutgoingInterviewAcceptanceMsgEvent(
                 recruiterId,
                 "Sending session description"
             )
-            InterviewAcceptanceMsg.send(repository, recruiterId, it){ ack ->
+            InterviewAcceptanceMsg.send(repository, sessionToken, recruiterId, it){ ack ->
                 repository.logger.logSocketOutgoingAck(
                     LoggerLvl.COMPLETE, SocketMsgType.INTERVIEW_ACCEPTANCE_NAME, recruiterId, ack
                 )

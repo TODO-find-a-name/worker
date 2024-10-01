@@ -8,10 +8,12 @@ class TeamApplicationMsg: DirectMsg(){
     companion object {
         fun send(
             repository: Repository,
+            sessionToken: String,
             to: String,
             onAck: (ack: Boolean) -> Any
         ){
             val msg = TeamApplicationMsg()
+            msg.sessionToken = sessionToken
             msg.to = to
             msg.from = repository.socket.id()
             repository.socket.sendMsg(SocketMsgType.TEAM_APPLICATION, repository.parser.toJson(msg), onAck)
